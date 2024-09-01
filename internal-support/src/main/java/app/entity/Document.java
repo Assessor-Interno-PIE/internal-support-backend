@@ -22,7 +22,7 @@ import java.sql.Timestamp;
 public class Document {
 
     @Id
-    @GeneratedValue(GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank
