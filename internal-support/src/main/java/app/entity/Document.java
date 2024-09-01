@@ -1,16 +1,13 @@
 package app.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.sql.Timestamp;
 
@@ -32,9 +29,13 @@ public class Document {
     private String content;
 
     @NotNull
+    @ManyToOne
+    @JsonIgnoreProperties("documents")
     private Department department;
 
     @NotNull
+    @ManyToOne
+    @JsonIgnoreProperties("documents")
     private Category category;
 
     @NotNull
@@ -44,6 +45,8 @@ public class Document {
     private Timestamp updatedAt;
 
     @NotNull
+    @ManyToOne
+    @JsonIgnoreProperties("documents")
     private User user;
 
 }
