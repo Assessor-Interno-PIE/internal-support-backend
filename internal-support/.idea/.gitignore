@@ -1,7 +1,6 @@
 # Default ignored files
 /shelf/
 /workspace.xml
-/misc.xml
 
 # Compiled class files
 *.class
@@ -19,6 +18,7 @@
 
 # IntelliJ IDEA
 .idea/
+/misc.xml
 /*.iml
 /out/
 
