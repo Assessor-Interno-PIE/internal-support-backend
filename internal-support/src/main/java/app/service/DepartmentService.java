@@ -15,49 +15,45 @@ public class DepartmentService {
     @Autowired
     private DepartmentRepository departmentRepository;
 
-    public String save (@Valid Department department){
+    public String save(@Valid Department department) {
         departmentRepository.save(department);
         return "Departamento salvo com sucesso";
     }
 
-    public Department findById(@Valid long id){
-        if(departmentRepository.existsById(id)){
+    public Department findById(@Valid Long id) {
+        if (departmentRepository.existsById(id)) {
             Optional<Department> department = departmentRepository.findById(id);
             return department.get();
-        }else{
-            throw new RuntimeException("Departamento nao encontrado com id: "+id);
+        } else {
+            throw new RuntimeException("Departamento nao encontrado com id: " + id);
         }
     }
 
-    public List<Department> findAll(){
+    public List<Department> findAll() {
         List<Department> departments = departmentRepository.findAll();
-        if(departments.isEmpty()){
+        if (departments.isEmpty()) {
             throw new RuntimeException("Não há departamentos registrados!");
-        }else{
+        } else {
             return departments;
         }
     }
 
-    public void deleteById(@Valid long id){
+    public void deleteById(@Valid Long id) {
         // verifica se o departamento existe
         Department department = departmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Departamento não encontrado com id: " + id));
-
         // agora pode deletar o dep
         departmentRepository.deleteById(id);
     }
 
-    public Department updateById(@Valid long id, Department updatedDepartment){
-
+    public Department updateById(@Valid Long id, Department updatedDepartment) {
         return departmentRepository.findById(id)
                 .map(department -> {
                     department.setName(updatedDepartment.getName());
                     department.setDocuments(updatedDepartment.getDocuments());
                     department.setUsers(updatedDepartment.getUsers());
-
                     return departmentRepository.save(department);
                 })
-                .orElseThrow(()-> new RuntimeException("Departamento não encontrado com id: " + id));
+                .orElseThrow(() -> new RuntimeException("Departamento não encontrado com id: " + id));
     }
-
 }

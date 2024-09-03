@@ -15,12 +15,12 @@ public class LogsService {
     @Autowired
     private LogsRepository logsRepository;
 
-    public String save (@Valid Logs logs){
+    public String save(@Valid Logs logs){
         logsRepository.save(logs);
         return "Log salva com sucesso";
     }
 
-    public Logs findById(@Valid long id){
+    public Logs findById(@Valid Long id){
         if(logsRepository.existsById(id)){
             Optional<Logs> logs = logsRepository.findById(id);
             return logs.get();
@@ -38,16 +38,15 @@ public class LogsService {
         }
     }
 
-    public void deleteById(@Valid long id){
+    public void deleteById(@Valid Long id){
         // verifica se a log existe
         Logs logs = logsRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Log não encontrada com id: " + id));
-
         // agora pode deletar o log
         logsRepository.deleteById(id);
     }
 
-    public Logs updateById(@Valid long id, Logs updatedLogs){
+    public Logs updateById(@Valid Long id, Logs updatedLogs){
         return logsRepository.findById(id)
                 .map(logs -> { // tipo um for
                     logs.setEndpoint(updatedLogs.getEndpoint());
@@ -55,10 +54,8 @@ public class LogsService {
                     logs.setMethod(updatedLogs.getMethod());
                     logs.setStatus(updatedLogs.getStatus());
                     logs.setUser(updatedLogs.getUser());
-
                     return logsRepository.save(logs);
                 })
                 .orElseThrow(()-> new RuntimeException("Log não encontrado com id: " + id));
     }
-
 }
