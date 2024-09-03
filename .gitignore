@@ -1,6 +1,6 @@
 # Default ignored files
 /shelf/
-/workspace.xml
+/.idea/workspace.xml
 
 # Compiled class files
 *.class
@@ -57,5 +57,3 @@ Thumbs.db
 # Other
 *.swp
 *.swo
-*.sublime-workspace
-*.sublime-project
