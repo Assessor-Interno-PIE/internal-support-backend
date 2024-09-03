@@ -1,3 +1,60 @@
 # Default ignored files
 /shelf/
 /workspace.xml
+
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# Maven
+/.mvn/
+/target/
+
+# Gradle
+/.gradle/
+/build/
+
+# IntelliJ IDEA
+.idea/
+/*.iml
+/out/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# NetBeans
+nbproject/private/
+/nbbuild/
+/nbdist/
+/nbactions.xml
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+*.env
+
+# IDE-specific files
+*.sublime-project
+*.sublime-workspace
+.vscode/
+
+# Application specific
+*.jar
+*.war
+*.ear
+
+# Sensitive files
+*.properties
+
+# Other
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
