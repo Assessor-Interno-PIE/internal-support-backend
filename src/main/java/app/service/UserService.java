@@ -1,6 +1,9 @@
 package app.service;
 
+import app.entity.Department;
 import app.entity.User;
+import app.repository.AccessLevelRepository;
+import app.repository.DepartmentRepository;
 import app.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +17,24 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private DepartmentRepository departmentRepository;
+
+    @Autowired
+    private AccessLevelRepository accessLevelRepository;
+
     public String save(@Valid User user) {
+        // Verifica se o departamento existe
+        if (!departmentRepository.existsById(user.getDepartment().getId())) {
+            throw new IllegalArgumentException("Departamento não encontrado.");
+        }
+
+        // Verifica se o nível de acesso existe
+        if (!accessLevelRepository.existsById(user.getAccessLevel().getId())) {
+            throw new IllegalArgumentException("Nível de acesso não encontrado.");
+        }
+
+        // Salva o usuário
         userRepository.save(user);
         return "Usuário salvo com sucesso.";
     }

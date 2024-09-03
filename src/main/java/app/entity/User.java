@@ -32,6 +32,7 @@ public class User {
     private String email;
 
     @NotBlank
+    // pattern
     private String password;
 
     @NotNull
