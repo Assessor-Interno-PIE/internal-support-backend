@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class DepartmentService {
@@ -21,12 +20,8 @@ public class DepartmentService {
     }
 
     public Department findById(@Valid Long id) {
-        if (departmentRepository.existsById(id)) {
-            Optional<Department> department = departmentRepository.findById(id);
-            return department.get();
-        } else {
-            throw new RuntimeException("Departamento nao encontrado com id: " + id);
-        }
+        return departmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Departamento não encontrado com id: " + id));
     }
 
     public List<Department> findAll() {
@@ -38,12 +33,13 @@ public class DepartmentService {
         }
     }
 
-    public void deleteById(@Valid Long id) {
-        // verifica se o departamento existe
+    public String deleteById(@Valid Long id) {
+        // Verifica se o departamento existe
         Department department = departmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Departamento não encontrado com id: " + id));
-        // agora pode deletar o dep
+        // Agora pode deletar o departamento
         departmentRepository.deleteById(id);
+        return "Departamento deletado com sucesso.";
     }
 
     public Department updateById(@Valid Long id, Department updatedDepartment) {

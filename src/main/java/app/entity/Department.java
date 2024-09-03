@@ -2,6 +2,7 @@ package app.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,7 +21,8 @@ public class Department {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+    @NotBlank(message = "O campo 'nome' não pode estar em branco.")
+    @Pattern(regexp = "^[A-Za-zÀ-ÿ\\s]+$", message = "O campo 'nome' deve conter apenas letras.")
     private String name;
 
     @OneToMany(mappedBy = "department")

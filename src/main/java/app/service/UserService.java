@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -17,33 +16,30 @@ public class UserService {
 
     public String save(@Valid User user) {
         userRepository.save(user);
-        return "Usuario salvo com sucesso";
+        return "Usuário salvo com sucesso.";
     }
 
     public User findById(@Valid Long id) {
-        if (userRepository.existsById(id)) {
-            Optional<User> user = userRepository.findById(id);
-            return user.get();
-        } else {
-            throw new RuntimeException("Usuario nao encontrado com id: " + id);
-        }
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com id: " + id));
     }
 
     public List<User> findAll() {
         List<User> users = userRepository.findAll();
         if (users.isEmpty()) {
-            throw new RuntimeException("Não há usuarios registrados!");
+            throw new RuntimeException("Não há usuários registrados!");
         } else {
             return users;
         }
     }
 
-    public void deleteById(@Valid Long id) {
-        // verifica se o usuario existe
+    public String deleteById(@Valid Long id) {
+        // Verifica se o usuário existe
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario não encontrado com id: " + id));
-        // agora pode deletar o usuario
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com id: " + id));
+        // Agora pode deletar o usuário
         userRepository.deleteById(id);
+        return "Usuário deletado com sucesso.";
     }
 
     public User updateById(@Valid Long id, User updatedUser) {
@@ -57,6 +53,6 @@ public class UserService {
                     user.setAccessLevel(updatedUser.getAccessLevel());
                     return userRepository.save(user);
                 })
-                .orElseThrow(() -> new RuntimeException("Usuario não encontrado com id: " + id));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com id: " + id));
     }
 }

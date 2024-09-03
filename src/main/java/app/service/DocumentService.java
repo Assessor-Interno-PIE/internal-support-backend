@@ -1,14 +1,13 @@
 package app.service;
 
-
 import app.entity.Document;
 import app.repository.DocumentRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class DocumentService {
@@ -17,17 +16,17 @@ public class DocumentService {
     private DocumentRepository documentRepository;
 
     public String save(@Valid Document document) {
+        // Define timestamps de criação e atualização antes de salvar
+        Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
+        document.setCreatedAt(currentTimestamp);
+        document.setUpdatedAt(currentTimestamp);
         documentRepository.save(document);
-        return "Documento salvo com sucesso";
+        return "Documento salvo com sucesso.";
     }
 
     public Document findById(@Valid Long id) {
-        if (documentRepository.existsById(id)) {
-            Optional<Document> document = documentRepository.findById(id);
-            return document.get();
-        } else {
-            throw new RuntimeException("Documento nao encontrado com id: " + id);
-        }
+        return documentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Documento não encontrado com id: " + id));
     }
 
     public List<Document> findAll() {
@@ -39,12 +38,13 @@ public class DocumentService {
         }
     }
 
-    public void deleteById(@Valid Long id) {
-        // verifica se o documento existe
+    public String deleteById(@Valid Long id) {
+        // Verifica se o documento existe
         Document document = documentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Documento não encontrado com id: " + id));
-        // agora pode deletar o documento
+        // Agora pode deletar o documento
         documentRepository.deleteById(id);
+        return "Documento deletado com sucesso.";
     }
 
     public Document updateById(@Valid Long id, Document updatedDocument) {
@@ -55,6 +55,7 @@ public class DocumentService {
                     document.setDepartment(updatedDocument.getDepartment());
                     document.setCategory(updatedDocument.getCategory());
                     document.setUser(updatedDocument.getUser());
+                    document.setUpdatedAt(new Timestamp(System.currentTimeMillis())); // Atualiza o timestamp de modificação
                     return documentRepository.save(document);
                 })
                 .orElseThrow(() -> new RuntimeException("Documento não encontrado com id: " + id));
