@@ -21,12 +21,8 @@ public class CategoryService {
     }
 
     public Category findById(@Valid Long id) {
-        if (categoryRepository.existsById(id)) {
-            Optional<Category> category = categoryRepository.findById(id);
-            return category.get();
-        } else {
-            throw new RuntimeException("Categoria nao encontrada com id: " + id);
-        }
+        return categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Categoria não encontrada com id: " + id));
     }
 
     public List<Category> findAll() {
@@ -38,12 +34,13 @@ public class CategoryService {
         }
     }
 
-    public void deleteById(@Valid Long id) {
-        // verifica se o categoria existe
+    public String deleteById(@Valid Long id) {
+        // Verifica se a categoria existe
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Categoria não encontrada com id: " + id));
-        // agora pode deletar a categoria
+        // Agora pode deletar a categoria
         categoryRepository.deleteById(id);
+        return "Categoria deletada com sucesso.";
     }
 
     public Category updateById(@Valid Long id, Category updatedCategory) {
