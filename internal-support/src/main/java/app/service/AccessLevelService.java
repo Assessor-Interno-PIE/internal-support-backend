@@ -38,12 +38,13 @@ public class AccessLevelService {
         }
     }
 
-    public void deleteById(@Valid Long id) {
-        // verifica se o nivel existe
+    public String deleteById(@Valid long id) {
+        // Verifica se o nível existe
         AccessLevel accessLevel = accessLevelRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Nivel de acesso não encontrada com id: " + id));
-        // agora pode deletar o nivel
+                .orElseThrow(() -> new RuntimeException("Nível de acesso não encontrado com id: " + id));
+        // Agora pode deletar o nível
         accessLevelRepository.deleteById(id);
+        return "Nível de acesso deletado com sucesso.";
     }
 
     public AccessLevel updateById(@Valid Long id, AccessLevel updatedAccessLevel) {
@@ -53,6 +54,6 @@ public class AccessLevelService {
                     accessLevel.setUsers(updatedAccessLevel.getUsers());
                     return accessLevelRepository.save(accessLevel);
                 })
-                .orElseThrow(() -> new RuntimeException("Nivel de acesso não encontrada com id: " + id));
+                .orElseThrow(() -> new RuntimeException("Nivel de acesso não encontrado com id: " + id));
     }
 }
