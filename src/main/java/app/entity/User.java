@@ -1,5 +1,6 @@
 package app.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -14,10 +15,10 @@ import lombok.Setter;
 import java.util.List;
 
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
 
     @Id
@@ -31,7 +32,7 @@ public class User {
     @Email
     private String email;
 
-    @NotBlank
+    @NotBlank(message = "A senha não pode estar em branco.")
     // pattern
     private String password;
 

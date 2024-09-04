@@ -12,10 +12,10 @@ import lombok.Setter;
 import java.sql.Timestamp;
 
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Document {
 
     @Id
@@ -30,6 +30,7 @@ public class Document {
 
     @NotNull
     @ManyToOne
+    @JsonIgnoreProperties("documents")
     private Department department;
 
     @NotNull
@@ -38,11 +39,11 @@ public class Document {
     private Category category;
 
     private Timestamp createdAt;
-
     private Timestamp updatedAt;
 
     @NotNull
     @ManyToOne
+    @JsonIgnoreProperties("documents")
     private User user;
 
 }
