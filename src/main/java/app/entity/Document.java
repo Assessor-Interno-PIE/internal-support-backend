@@ -30,23 +30,19 @@ public class Document {
 
     @NotNull
     @ManyToOne
-    @JsonIgnoreProperties("documents")
     private Department department;
 
     @NotNull
     @ManyToOne
-    @JsonIgnoreProperties("documents")
+    @JsonIgnoreProperties({"documents"})
     private Category category;
 
-    @NotNull
     private Timestamp createdAt;
 
-    @NotNull
     private Timestamp updatedAt;
 
     @NotNull
     @ManyToOne
-    @JsonIgnoreProperties("documents")
     private User user;
 
 }

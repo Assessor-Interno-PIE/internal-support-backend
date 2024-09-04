@@ -1,7 +1,8 @@
 package app.service;
 
 import app.entity.Document;
-import app.repository.DocumentRepository;
+import app.repository.*;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,32 @@ public class DocumentService {
     @Autowired
     private DocumentRepository documentRepository;
 
+    @Autowired
+    private DepartmentRepository departmentRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
     public String save(@Valid Document document) {
+
+        // Verifica se o departamento existe
+        if (!departmentRepository.existsById(document.getDepartment().getId())) {
+            throw new IllegalArgumentException("Departamento não encontrado.");
+        }
+
+        // Verifica se a categoria existe
+        if (!categoryRepository.existsById(document. getCategory().getId())){
+            throw new IllegalArgumentException("Categoria não encontrada.");
+        }
+
+        // Verifica se o usuario existe
+        if (!userRepository.existsById(document.getUser().getId())){
+            throw new IllegalArgumentException("Usuário não encontrado.");
+        }
+
         // Define timestamps de criação e atualização antes de salvar
         Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
         document.setCreatedAt(currentTimestamp);
