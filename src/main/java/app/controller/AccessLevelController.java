@@ -1,7 +1,12 @@
 package app.controller;
 
+import app.DTO.AccessLevelDTO;
+import app.DTO.UserDTO;
+import app.ModelMapperConfig.AccessLevelMapper;
 import app.entity.AccessLevel;
+import app.entity.User;
 import app.service.AccessLevelService;
+import jakarta.persistence.Access;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/access-levels")
@@ -17,22 +23,33 @@ public class AccessLevelController {
     @Autowired
     private AccessLevelService accessLevelService;
 
+    @Autowired
+    private AccessLevelMapper accessLevelMapper;
+
     @PostMapping("/save")
-    public ResponseEntity<String> save(@Valid @RequestBody AccessLevel accessLevel) {
+    public ResponseEntity<String> save(@Valid @RequestBody AccessLevelDTO accessLevelDTO) {
+        AccessLevel accessLevel = accessLevelMapper.toAccessLevel(accessLevelDTO);
+
         String message = accessLevelService.save(accessLevel);
         return new ResponseEntity<>(message, HttpStatus.CREATED);
     }
 
     @GetMapping("/find-by-id/{id}")
-    public ResponseEntity<AccessLevel> findById(@PathVariable Long id) {
+    public ResponseEntity<AccessLevelDTO> findById(@PathVariable Long id) {
         AccessLevel accessLevel = accessLevelService.findById(id);
-        return new ResponseEntity<>(accessLevel, HttpStatus.OK);
+
+        AccessLevelDTO accessLevelDTO = accessLevelMapper.toAccessLevelDTO(accessLevel);
+        return new ResponseEntity<>(accessLevelDTO, HttpStatus.OK);
     }
 
     @GetMapping("/find-all")
-    public ResponseEntity<List<AccessLevel>> findAll() {
+    public ResponseEntity<List<AccessLevelDTO>> findAll() {
         List<AccessLevel> accessLevels = accessLevelService.findAll();
-        return new ResponseEntity<>(accessLevels, HttpStatus.OK);
+
+        List<AccessLevelDTO> accessLevelDTOS = accessLevels.stream()
+                .map(accessLevelMapper::toAccessLevelDTO)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(accessLevelDTOS, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete-by-id/{id}")
@@ -42,8 +59,10 @@ public class AccessLevelController {
     }
 
     @PutMapping("/update-by-id/{id}")
-    public ResponseEntity<AccessLevel> updateById(@Valid @PathVariable Long id, @RequestBody AccessLevel updatedAccessLevel) {
-        AccessLevel accessLevel = accessLevelService.updateById(id, updatedAccessLevel);
-        return new ResponseEntity<>(accessLevel, HttpStatus.OK);
+    public ResponseEntity<AccessLevelDTO> updateById(@Valid @PathVariable Long id, @RequestBody AccessLevelDTO accessLevelDTO) {
+        AccessLevel accessLevel = accessLevelMapper.toAccessLevel(accessLevelDTO);
+        AccessLevel updatedAccessLevel = accessLevelService.updateById(id, accessLevel);
+        AccessLevelDTO updatedAccessLevelDTO = accessLevelMapper.toAccessLevelDTO(updatedAccessLevel);
+        return new ResponseEntity<>(updatedAccessLevelDTO, HttpStatus.OK);
     }
 }
