@@ -25,18 +25,18 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+    @NotBlank(message = "O nome não deve estar vazio")
     @Pattern(regexp = "^(\\S+\\s+\\S+)(\\s+\\S+)?$", message = "O nome deve ter pelo menos duas palavras e um espaço.")
     private String name;
 
-    @Email
+    @Email(message = "Formato de e-mail incorreto")
     private String email;
 
     @NotBlank(message = "A senha não pode estar em branco.")
     // pattern
     private String password;
 
-    @NotNull
+    @NotNull(message = "O departamento não pode estar vazio")
     @ManyToOne
     @JsonIgnoreProperties("users")
     private Department department;
@@ -45,7 +45,7 @@ public class User {
     @JsonIgnoreProperties("viewed")
     private List<Document> viewed;
 
-    @NotNull
+    @NotNull(message = "O nível de acesso não deve estar vazio")
     @ManyToOne
     @JsonIgnoreProperties("users")
     private AccessLevel accessLevel;

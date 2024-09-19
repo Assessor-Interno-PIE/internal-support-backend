@@ -22,18 +22,18 @@ public class Document {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+    @NotBlank(message = "O título não pode estar vazio")
     private String title;
 
-    @NotBlank
+    @NotBlank(message = "O conteúdo não pode estar vazio")
     private String content;
 
-    @NotNull
+    @NotNull(message = "O departamento não pode estar vazio")
     @ManyToOne
     @JsonIgnoreProperties("documents")
     private Department department;
 
-    @NotNull
+    @NotNull(message = "A categoria não deve estar vazia")
     @ManyToOne
     @JsonIgnoreProperties({"documents"})
     private Category category;
@@ -41,7 +41,7 @@ public class Document {
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
-    @NotNull
+    @NotNull(message = "O usuário não deve estar vazio")
     @ManyToOne
     @JsonIgnoreProperties("documents")
     private User user;

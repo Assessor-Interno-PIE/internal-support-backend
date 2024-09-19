@@ -20,7 +20,7 @@ public class Logs {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+    @NotBlank(message = "endpoint não deve estar vazio")
     private String endpoint;
 
     @NotNull
