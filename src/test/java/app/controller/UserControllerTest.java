@@ -93,7 +93,7 @@ public class UserControllerTest {
     @Test
     public void testFindAll() throws Exception {
         List<User> users = new ArrayList<>();
-        users.add(new User()); // Adicione usuários de teste conforme necessário
+        users.add(new User());
 
         when(userService.findAll()).thenReturn(users);
 
@@ -117,14 +117,14 @@ public class UserControllerTest {
 
     @Test
     public void testUpdateById() throws Exception {
-        User updatedUser = new User(); // Crie um usuário atualizado de teste
+        User updatedUser = new User();
         updatedUser.setName("Updated User");
 
         when(userService.updateById(anyLong(), any(User.class))).thenReturn(updatedUser);
 
         mockMvc.perform(put("/api/users/update-by-id/1")
                         .contentType("application/json")
-                        .content("{\"name\":\"Updated User\"}")) // Ajuste conforme necessário
+                        .content("{\"name\":\"Updated User\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Updated User"));
 
