@@ -46,4 +46,5 @@ public class AccessLevelController {
         AccessLevel accessLevel = accessLevelService.updateById(id, updatedAccessLevel);
         return new ResponseEntity<>(accessLevel, HttpStatus.OK);
     }
+
 }

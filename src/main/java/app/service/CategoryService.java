@@ -2,6 +2,8 @@ package app.service;
 
 import app.entity.Category;
 import app.repository.CategoryRepository;
+import com.sun.jdi.InternalException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,7 +30,7 @@ public class CategoryService {
     public List<Category> findAll() {
         List<Category> categories = categoryRepository.findAll();
         if (categories.isEmpty()) {
-            throw new RuntimeException("Não há categorias registradas!");
+            throw new InternalException("Não há categorias registradas!");
         } else {
             return categories;
         }
@@ -37,10 +39,10 @@ public class CategoryService {
     public String deleteById(@Valid Long id) {
         // Verifica se a categoria existe
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Categoria não encontrada com id: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Categoria não encontrada com id: " + id));
         // Agora pode deletar a categoria
         categoryRepository.deleteById(id);
-        return "Categoria deletada com sucesso.";
+        return "Categoria deletada com sucesso";
     }
 
     public Category updateById(@Valid Long id, Category updatedCategory) {
@@ -50,6 +52,6 @@ public class CategoryService {
                     category.setDocuments(updatedCategory.getDocuments());
                     return categoryRepository.save(category);
                 })
-                .orElseThrow(() -> new RuntimeException("Categoria não encontrada com id: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Categoria não encontrada com id: " + id));
     }
 }

@@ -42,7 +42,7 @@ public class AccessLevelService {
                 .orElseThrow(() -> new RuntimeException("Nível de acesso não encontrado com id: " + id));
         // Agora pode deletar o nível
         accessLevelRepository.deleteById(id);
-        return "Nível de acesso deletado com sucesso.";
+        return "Nível de acesso deletado com sucesso";
     }
 
     public AccessLevel updateById(@Valid Long id, AccessLevel updatedAccessLevel) {

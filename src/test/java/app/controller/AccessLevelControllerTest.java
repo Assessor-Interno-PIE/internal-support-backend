@@ -22,6 +22,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AccessLevelController.class)
@@ -122,5 +123,52 @@ class AccessLevelControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/access-levels/find-all"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(MockMvcResultMatchers.content().string("Não há níveis de acesso registrados!"));
+    }
+
+    @Test
+    void updateAccessLevelSuccess() throws Exception {
+        AccessLevel updatedAccessLevel = new AccessLevel();
+        updatedAccessLevel.setId(1L);
+        updatedAccessLevel.setName("Nível de Acesso Atualizado");
+
+        when(accessLevelService.updateById(anyLong(), any(AccessLevel.class))).thenReturn(updatedAccessLevel);
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/access-levels/update-by-id/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedAccessLevel)))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1L))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Nível de Acesso Atualizado"));
+    }
+
+    @Test
+    void updateAccessLevelFailure() throws Exception {
+        AccessLevel updatedAccessLevel = new AccessLevel();
+        updatedAccessLevel.setName("Novo Nome");
+
+        when(accessLevelService.updateById(anyLong(), any(AccessLevel.class)))
+                .thenThrow(new EntityNotFoundException("Nível de acesso não encontrado com id: 1"));
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/access-levels/update-by-id/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedAccessLevel)))
+                .andExpect(status().isNotFound())
+                .andExpect(MockMvcResultMatchers.content().string("Nível de acesso não encontrado com id: 1"));
+    }
+
+    @Test
+    void deleteAccessByIdSuccess() throws Exception {
+        when(accessLevelService.deleteById(1L)).thenReturn("Nível de acesso deletado com sucesso");
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/access-levels/delete-by-id/1"))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string("Nível de acesso deletado com sucesso"));
+    }
+
+    @Test
+    void deleteAccessByIdFailure() throws Exception {
+        when(accessLevelService.deleteById(2L)).thenThrow(new EntityNotFoundException("Nível de acesso não encontrado com id: 2"));
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/access-levels/delete-by-id/2"))
+                .andExpect(status().isNotFound())
+                .andExpect(MockMvcResultMatchers.content().string("Nível de acesso não encontrado com id: 2"));
     }
 }

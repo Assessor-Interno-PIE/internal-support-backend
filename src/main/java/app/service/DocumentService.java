@@ -47,7 +47,7 @@ public class DocumentService {
         document.setCreatedAt(currentTimestamp);
         document.setUpdatedAt(currentTimestamp);
         documentRepository.save(document);
-        return "Documento salvo com sucesso.";
+        return "Documento salvo com sucesso";
     }
 
     public Document findById(@Valid Long id) {
