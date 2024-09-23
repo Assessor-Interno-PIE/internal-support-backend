@@ -2,6 +2,8 @@ package app.service;
 
 import app.entity.AccessLevel;
 import app.repository.AccessLevelRepository;
+import com.sun.jdi.InternalException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,19 +22,15 @@ public class AccessLevelService {
         return "Nivel de acesso salvo com sucesso";
     }
 
-    public AccessLevel findById(@Valid Long id) {
-        if (accessLevelRepository.existsById(id)) {
-            Optional<AccessLevel> accessLevel = accessLevelRepository.findById(id);
-            return accessLevel.get();
-        } else {
-            throw new RuntimeException("Nivel de acesso nao encontrada com id: " + id);
-        }
+    public AccessLevel findById(Long id) {
+        return accessLevelRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Nível de acesso não encontrado com id: " + id));
     }
 
     public List<AccessLevel> findAll() {
         List<AccessLevel> accessLevels = accessLevelRepository.findAll();
         if (accessLevels.isEmpty()) {
-            throw new RuntimeException("Não há niveis de acesso registrados!");
+            throw new InternalException("Não há niveis de acesso registrados!");
         } else {
             return accessLevels;
         }
@@ -44,7 +42,7 @@ public class AccessLevelService {
                 .orElseThrow(() -> new RuntimeException("Nível de acesso não encontrado com id: " + id));
         // Agora pode deletar o nível
         accessLevelRepository.deleteById(id);
-        return "Nível de acesso deletado com sucesso.";
+        return "Nível de acesso deletado com sucesso";
     }
 
     public AccessLevel updateById(@Valid Long id, AccessLevel updatedAccessLevel) {
