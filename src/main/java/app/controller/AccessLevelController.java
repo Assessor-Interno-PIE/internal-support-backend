@@ -2,6 +2,7 @@ package app.controller;
 
 import app.entity.AccessLevel;
 import app.service.AccessLevelService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ public class AccessLevelController {
     @Autowired
     private AccessLevelService accessLevelService;
 
+    @Operation(description = "Salva um nível de acesso")
     @PostMapping("/save")
     public ResponseEntity<String> save(@Valid @RequestBody AccessLevel accessLevel) {
         String message = accessLevelService.save(accessLevel);
