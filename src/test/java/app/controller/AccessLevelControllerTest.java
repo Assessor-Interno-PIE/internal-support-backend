@@ -1,3 +1,4 @@
+
 package app.controller;
 
 import app.entity.AccessLevel;
@@ -53,8 +54,8 @@ class AccessLevelControllerTest {
 
         when(accessLevelService.save(any(AccessLevel.class))).thenReturn("Nivel de acesso salvo com sucesso");
         mockMvc.perform(MockMvcRequestBuilders.post("/api/access-levels/save")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(accessLevel)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(accessLevel)))
                 .andExpect(status().isCreated())
                 .andExpect(MockMvcResultMatchers.content().string("Nivel de acesso salvo com sucesso"));
     }
@@ -66,8 +67,8 @@ class AccessLevelControllerTest {
         accessLevel.setUsers(users);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/access-levels/save")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(accessLevel)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(accessLevel)))
                 .andExpect((status().isBadRequest()))
                 .andExpect(MockMvcResultMatchers.content().string("Erro: O nome não pode estar em branco"));
     }

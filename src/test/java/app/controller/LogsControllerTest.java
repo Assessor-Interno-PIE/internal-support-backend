@@ -28,51 +28,51 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class LogsControllerTest {
 
-        @InjectMocks
-        private LogsController logsController;
+    @InjectMocks
+    private LogsController logsController;
 
-        @Mock
-        private LogsService logsService;
+    @Mock
+    private LogsService logsService;
 
-        @Autowired
-        private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-        private ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
-        @BeforeEach
-        public void setUp() {
-            MockitoAnnotations.openMocks(this);
-            mockMvc = MockMvcBuilders.standaloneSetup(logsController).build();
-            objectMapper = new ObjectMapper();
-        }
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(logsController).build();
+        objectMapper = new ObjectMapper();
+    }
 
-        @Test
-        public void testSaveLog() throws Exception {
-            User user = new User();
-            user.setId(1L);
+    @Test
+    public void testSaveLog() throws Exception {
+        User user = new User();
+        user.setId(1L);
 
-            Document document = new Document();
-            document.setId(1L);
+        Document document = new Document();
+        document.setId(1L);
 
-            Logs log = new Logs();
-            log.setEndpoint("/api/example");
-            log.setMethod("POST");
-            log.setStatus("SUCCESS");
-            log.setUser(user);
-            log.setDocument(document);
+        Logs log = new Logs();
+        log.setEndpoint("/api/example");
+        log.setMethod("POST");
+        log.setStatus("SUCCESS");
+        log.setUser(user);
+        log.setDocument(document);
 
-            when(logsService.save(any(Logs.class))).thenReturn("Log salvo com sucesso.");
+        when(logsService.save(any(Logs.class))).thenReturn("Log salvo com sucesso.");
 
-            String logJson = objectMapper.writeValueAsString(log);
+        String logJson = objectMapper.writeValueAsString(log);
 
-            mockMvc.perform(MockMvcRequestBuilders.post("/api/logs/save")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(logJson))
-                    .andExpect(status().isCreated())
-                    .andExpect(content().string("Log salvo com sucesso."));
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/logs/save")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(logJson))
+                .andExpect(status().isCreated())
+                .andExpect(content().string("Log salvo com sucesso."));
 
-            verify(logsService).save(any(Logs.class));
-        }
+        verify(logsService).save(any(Logs.class));
+    }
 
     @Test
     public void testFindById() throws Exception {
