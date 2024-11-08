@@ -47,7 +47,6 @@ public class DepartmentService {
                 .map(department -> {
                     department.setName(updatedDepartment.getName());
                     department.setDocuments(updatedDepartment.getDocuments());
-                    department.setUsers(updatedDepartment.getUsers());
                     return departmentRepository.save(department);
                 })
                 .orElseThrow(() -> new RuntimeException("Departamento não encontrado com id: " + id));

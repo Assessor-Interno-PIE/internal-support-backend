@@ -1,7 +1,5 @@
 package app.service;
 
-import app.entity.Category;
-import app.repository.CategoryRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

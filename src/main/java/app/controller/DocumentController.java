@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -18,15 +19,24 @@ public class DocumentController {
     private DocumentService documentService;
 
     @PostMapping("/save")
-    public ResponseEntity<String> save(@Valid @RequestBody Document document) {
-        String message = documentService.save(document);
-        return new ResponseEntity<>(message, HttpStatus.CREATED);
+    public ResponseEntity<String> save(@Valid @RequestPart("document") Document document,
+                                       @RequestPart("pdf") MultipartFile pdfFile) {
+        try {
+            String message = documentService.save(document, pdfFile);
+            return new ResponseEntity<>(message, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Erro ao salvar o documento: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/find-by-id/{id}")
     public ResponseEntity<Document> findById(@PathVariable Long id) {
-        Document document = documentService.findById(id);
-        return new ResponseEntity<>(document, HttpStatus.OK);
+        try {
+            Document document = documentService.findById(id);
+            return new ResponseEntity<>(document, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping("/find-all")
@@ -37,13 +47,23 @@ public class DocumentController {
 
     @DeleteMapping("/delete-by-id/{id}")
     public ResponseEntity<String> deleteById(@PathVariable Long id) {
-        String responseMessage = documentService.deleteById(id);
-        return new ResponseEntity<>(responseMessage, HttpStatus.OK);
+        try {
+            String responseMessage = documentService.deleteById(id);
+            return new ResponseEntity<>(responseMessage, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Erro ao deletar o documento: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PutMapping("/update-by-id/{id}")
-    public ResponseEntity<Document> updateById(@Valid @PathVariable Long id, @RequestBody Document updatedDocument) {
-        Document document = documentService.updateById(id, updatedDocument);
-        return new ResponseEntity<>(document, HttpStatus.OK);
+    public ResponseEntity<Document> updateById(@PathVariable Long id,
+                                               @RequestPart("document") Document updatedDocument,
+                                               @RequestPart(value = "pdf", required = false) MultipartFile pdfFile) {
+        try {
+            Document document = documentService.updateById(id, updatedDocument, pdfFile);
+            return new ResponseEntity<>(document, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
     }
 }

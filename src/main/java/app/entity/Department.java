@@ -17,21 +17,14 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Department {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank(message = "O nome não pode estar vazio")
-    @Pattern(regexp = "^[A-Za-zÀ-ÿ\\s]+$", message = "O nome deve conter apenas letras")
     private String name;
 
-    @OneToMany(mappedBy = "department")
+    @OneToMany(mappedBy = "department", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Document> documents;
-
-    @OneToMany(mappedBy = "department")
-    @JsonIgnore
-    private List<User> users;
-
 }

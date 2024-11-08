@@ -1,10 +1,8 @@
 package app.service;
 
-import app.entity.Category;
 import app.entity.Department;
 import app.entity.Document;
 import app.entity.User;
-import app.repository.CategoryRepository;
 import app.repository.DepartmentRepository;
 import app.repository.DocumentRepository;
 import app.repository.UserRepository;

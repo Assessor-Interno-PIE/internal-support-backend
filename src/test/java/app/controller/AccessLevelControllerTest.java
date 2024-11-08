@@ -1,12 +1,9 @@
 
 package app.controller;
 
-import app.entity.AccessLevel;
 import app.entity.User;
-import app.service.AccessLevelService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jdi.InternalException;
-import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +20,6 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AccessLevelController.class)

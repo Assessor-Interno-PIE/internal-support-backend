@@ -1,9 +1,7 @@
 package app.service;
 
 import app.entity.Document;
-import app.entity.Logs;
 import app.entity.User;
-import app.repository.LogsRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

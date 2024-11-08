@@ -1,7 +1,5 @@
 package app.controller;
 
-import app.entity.Category;
-import app.service.CategoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jdi.InternalException;
 import jakarta.persistence.EntityNotFoundException;

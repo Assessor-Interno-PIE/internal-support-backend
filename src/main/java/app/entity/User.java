@@ -26,14 +26,12 @@ public class User {
     private Long id;
 
     @NotBlank(message = "O nome não deve estar vazio")
-    @Pattern(regexp = "^(\\S+\\s+\\S+)(\\s+\\S+)?$", message = "O nome deve ter pelo menos duas palavras e um espaço.")
     private String name;
 
-    @Email(message = "Formato de e-mail incorreto")
-    private String email;
+    @NotBlank(message = "O nome de usuário não pode ser vazio")
+    private String username;
 
     @NotBlank(message = "A senha não pode estar em branco.")
-    // pattern
     private String password;
 
     @NotNull(message = "O departamento não pode estar vazio")
@@ -41,13 +39,6 @@ public class User {
     @JsonIgnoreProperties("users")
     private Department department;
 
-    @ManyToMany
-    @JsonIgnoreProperties("viewed")
-    private List<Document> viewed;
-
-    @NotNull(message = "O nível de acesso não deve estar vazio")
-    @ManyToOne
-    @JsonIgnoreProperties("users")
-    private AccessLevel accessLevel;
-
+    @NotNull(message = "isAdmin é inválido")
+    private Number isAdmin;
 }

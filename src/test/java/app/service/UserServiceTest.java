@@ -1,9 +1,7 @@
 package app.service;
 
-import app.entity.AccessLevel;
 import app.entity.Department;
 import app.entity.User;
-import app.repository.AccessLevelRepository;
 import app.repository.DepartmentRepository;
 import app.repository.UserRepository;
 import org.junit.jupiter.api.Test;
