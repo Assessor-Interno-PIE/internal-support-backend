@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Cascade;
 
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class Department {
     @JsonIgnore
     private List<Document> documents;
 
-    @OneToMany
+    @OneToMany(mappedBy = "department", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<User> users;
 }
