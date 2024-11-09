@@ -20,12 +20,9 @@ public class UserService {
 
 
     public String save(User user) {
-        // Verifica se o departamento existe
         if (!departmentRepository.existsById(user.getDepartment().getId())) {
             throw new IllegalArgumentException("Departamento não encontrado.");
         }
-
-        // Salva o usuário
         userRepository.save(user);
         return "Usuário salvo com sucesso.";
     }
@@ -45,10 +42,8 @@ public class UserService {
     }
 
     public String deleteById(Long id) {
-        // Verifica se o usuário existe
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado com id: " + id));
-        // Agora pode deletar o usuário
         userRepository.deleteById(id);
         return "Usuário deletado com sucesso.";
     }
