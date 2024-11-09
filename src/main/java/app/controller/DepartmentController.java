@@ -1,5 +1,6 @@
 package app.controller;
 
+import app.dto.DepartmentStatsDTO;
 import app.entity.Department;
 import app.service.DepartmentService;
 import jakarta.validation.Valid;
@@ -46,5 +47,16 @@ public class DepartmentController {
     public ResponseEntity<Department> updateById(@Valid @PathVariable Long id, @RequestBody Department updatedDepartment) {
         Department department = departmentService.updateById(id, updatedDepartment);
         return new ResponseEntity<>(department, HttpStatus.OK);
+    }
+
+    @GetMapping("/department-stats/{id}")
+    public ResponseEntity<DepartmentStatsDTO> departmentStatsById(@PathVariable Long id) {
+        Department department = departmentService.findById(id);
+
+        int numberOfUsers = department.getUsers().size();
+        int numberOfDocuments = department.getDocuments().size();
+
+        DepartmentStatsDTO stats = new DepartmentStatsDTO(numberOfUsers, numberOfDocuments);
+        return new ResponseEntity<>(stats, HttpStatus.OK);
     }
 }
