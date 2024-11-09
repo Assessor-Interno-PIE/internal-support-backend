@@ -66,4 +66,9 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("Departamento não encontrado"));
         return userRepository.findByDepartment(department);
     }
+
+    public List<User> findUsersByNameContaining(String keyword) {
+        return userRepository.findByNameContaining(keyword);
+    }
+
 }

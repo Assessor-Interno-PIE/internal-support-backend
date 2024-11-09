@@ -54,4 +54,10 @@ public class UserController {
         List<User> users = userService.findUsersByDepartment(id);
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
+
+    @GetMapping("/search/name-contains")
+    public ResponseEntity<List<User>> getUsersByNameContaining(@RequestParam String keyword) {
+        List<User> users = userService.findUsersByNameContaining(keyword);
+        return ResponseEntity.ok(users);
+    }
 }

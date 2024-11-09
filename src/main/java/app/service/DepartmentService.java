@@ -51,4 +51,8 @@ public class DepartmentService {
                 })
                 .orElseThrow(() -> new RuntimeException("Departamento não encontrado com id: " + id));
     }
+
+    public List<Department> findDepartmentsByNameContaining(String keyword) {
+        return departmentRepository.findByNameContaining(keyword);
+    }
 }

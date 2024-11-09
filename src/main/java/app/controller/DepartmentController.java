@@ -59,4 +59,10 @@ public class DepartmentController {
         DepartmentStatsDTO stats = new DepartmentStatsDTO(numberOfUsers, numberOfDocuments);
         return new ResponseEntity<>(stats, HttpStatus.OK);
     }
+
+    @GetMapping("/search/name-contains")
+    public ResponseEntity<List<Department>> getDepartmentsByNameContaining(@RequestParam String keyword) {
+        List<Department> departments = departmentService.findDepartmentsByNameContaining(keyword);
+        return ResponseEntity.ok(departments);
+    }
 }
