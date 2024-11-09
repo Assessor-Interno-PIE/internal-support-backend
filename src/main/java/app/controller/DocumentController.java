@@ -2,13 +2,15 @@ package app.controller;
 
 import app.entity.Document;
 import app.service.DocumentService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -19,13 +21,28 @@ public class DocumentController {
     private DocumentService documentService;
 
     @PostMapping("/save")
-    public ResponseEntity<String> save(@Valid @RequestPart("document") Document document,
-                                       @RequestPart("pdf") MultipartFile pdfFile) {
+    public ResponseEntity<String> saveDocument(@RequestParam("file") MultipartFile file,
+                                             @RequestParam("departmentId") Long departmentId) {
         try {
-            String message = documentService.save(document, pdfFile);
-            return new ResponseEntity<>(message, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>("Erro ao salvar o documento: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            Document document = documentService.save(file, departmentId);
+            return ResponseEntity.ok("Arquivo salvo com sucesso! ID do documento: " + document.getId());
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao salvar o arquivo: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/download/{documentId}")
+    public ResponseEntity<Resource> downloadDocument(@PathVariable Long documentId) {
+        try {
+            Resource resource = documentService.downloadFile(documentId);
+
+            String contentDisposition = "attachment; filename=\"" + resource.getFilename() + "\"";
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
+                    .body(resource);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
@@ -43,27 +60,5 @@ public class DocumentController {
     public ResponseEntity<List<Document>> findAll() {
         List<Document> documents = documentService.findAll();
         return new ResponseEntity<>(documents, HttpStatus.OK);
-    }
-
-    @DeleteMapping("/delete-by-id/{id}")
-    public ResponseEntity<String> deleteById(@PathVariable Long id) {
-        try {
-            String responseMessage = documentService.deleteById(id);
-            return new ResponseEntity<>(responseMessage, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("Erro ao deletar o documento: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @PutMapping("/update-by-id/{id}")
-    public ResponseEntity<Document> updateById(@PathVariable Long id,
-                                               @RequestPart("document") Document updatedDocument,
-                                               @RequestPart(value = "pdf", required = false) MultipartFile pdfFile) {
-        try {
-            Document document = documentService.updateById(id, updatedDocument, pdfFile);
-            return new ResponseEntity<>(document, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        }
     }
 }

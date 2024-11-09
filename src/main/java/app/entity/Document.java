@@ -26,6 +26,6 @@ public class Document {
     @ManyToOne
     private Department department;
 
-    // Campo para armazenar o caminho do PDF no sistema de arquivos
-    private String pdfContent;
+    @NotNull
+    private String filePath;
 }
