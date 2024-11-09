@@ -1,5 +1,6 @@
 package app.controller;
 
+import app.entity.Department;
 import app.entity.Document;
 import app.service.DocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +65,12 @@ public class DocumentController {
     @GetMapping("/find-all")
     public ResponseEntity<List<Document>> findAll() {
         List<Document> documents = documentService.findAll();
+        return new ResponseEntity<>(documents, HttpStatus.OK);
+    }
+
+    @GetMapping("/by-department/{id}")
+    public ResponseEntity<List<Document>> getDocumentsByDepartment(@PathVariable Long id) {
+        List<Document> documents = documentService.findDocumentsByDepartment(id);
         return new ResponseEntity<>(documents, HttpStatus.OK);
     }
 }

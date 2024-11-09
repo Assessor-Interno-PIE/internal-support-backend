@@ -75,4 +75,10 @@ public class DocumentService {
             return documents;
         }
     }
+
+    public List<Document> findDocumentsByDepartment(Long departmentId) {
+        Department department = departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Departamento não encontrado"));
+        return documentRepository.findByDepartment(department);
+    }
 }
