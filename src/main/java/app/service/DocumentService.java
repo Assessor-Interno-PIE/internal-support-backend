@@ -81,4 +81,9 @@ public class DocumentService {
                 .orElseThrow(() -> new IllegalArgumentException("Departamento não encontrado"));
         return documentRepository.findByDepartment(department);
     }
+
+    public List<Document> findDocumentsByTitleContaining(String keyword) {
+        return documentRepository.findByTitleContaining(keyword);
+    }
+
 }

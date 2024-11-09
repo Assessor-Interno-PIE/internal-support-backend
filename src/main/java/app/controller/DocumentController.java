@@ -73,4 +73,10 @@ public class DocumentController {
         List<Document> documents = documentService.findDocumentsByDepartment(id);
         return new ResponseEntity<>(documents, HttpStatus.OK);
     }
+
+    @GetMapping("/search/title-contains")
+    public ResponseEntity<List<Document>> getDocumentsByTitleContaining(@RequestParam String keyword) {
+        List<Document> documents = documentService.findDocumentsByTitleContaining(keyword);
+        return ResponseEntity.ok(documents);
+    }
 }
