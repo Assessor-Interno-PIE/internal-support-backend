@@ -28,7 +28,7 @@ public class DocumentService {
     @Value("${upload.path}")
     private String uploadPath;
 
-    public Document save(MultipartFile pdfFile, Long departmentId) throws IOException {
+    public Document save(MultipartFile pdfFile, Long departmentId, String title, String description) throws IOException {
         String originalFilename = pdfFile.getOriginalFilename();
         String filename = UUID.randomUUID() + "_" + originalFilename;
         Path filePath = Paths.get(uploadPath, filename);
@@ -40,7 +40,8 @@ public class DocumentService {
 
         Document document = new Document();
         document.setDepartment(department);
-        document.setTitle(originalFilename);
+        document.setTitle(title);
+        document.setDescription(description);
         document.setFilePath(filePath.toString());
 
         return documentRepository.save(document);

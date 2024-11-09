@@ -21,10 +21,14 @@ public class DocumentController {
     private DocumentService documentService;
 
     @PostMapping("/save")
-    public ResponseEntity<String> saveDocument(@RequestParam("file") MultipartFile file,
-                                             @RequestParam("departmentId") Long departmentId) {
+    public ResponseEntity<String> saveDocument(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("departmentId") Long departmentId,
+            @RequestParam("title") String title,
+            @RequestParam("description") String description
+    ) {
         try {
-            Document document = documentService.save(file, departmentId);
+            Document document = documentService.save(file, departmentId, title, description);
             return ResponseEntity.ok("Arquivo salvo com sucesso! ID do documento: " + document.getId());
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao salvar o arquivo: " + e.getMessage());
