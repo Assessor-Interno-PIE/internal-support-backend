@@ -1,5 +1,7 @@
 package app.service;
 
+import app.entity.Department;
+import app.entity.Document;
 import app.entity.User;
 import app.repository.DepartmentRepository;
 import app.repository.UserRepository;
@@ -57,5 +59,11 @@ public class UserService {
                     return userRepository.save(user);
                 })
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado com id: " + id));
+    }
+
+    public List<User> findUsersByDepartment(Long departmentId) {
+        Department department = departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Departamento não encontrado"));
+        return userRepository.findByDepartment(department);
     }
 }

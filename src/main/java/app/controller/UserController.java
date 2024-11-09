@@ -1,5 +1,6 @@
 package app.controller;
 
+import app.entity.Document;
 import app.entity.User;
 import app.service.UserService;
 import jakarta.validation.Valid;
@@ -46,5 +47,11 @@ public class UserController {
     public ResponseEntity<User> updateById(@Valid @PathVariable Long id, @RequestBody User updatedUser) {
         User user = userService.updateById(id, updatedUser);
         return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    @GetMapping("/by-department/{id}")
+    public ResponseEntity<List<User>> getUsersByDepartment(@PathVariable Long id) {
+        List<User> users = userService.findUsersByDepartment(id);
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 }
