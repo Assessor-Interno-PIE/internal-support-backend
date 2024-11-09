@@ -40,5 +40,5 @@ public class User {
     private Department department;
 
     @NotNull(message = "isAdmin é inválido")
-    private Number isAdmin;
+    private int isAdmin;
 }
