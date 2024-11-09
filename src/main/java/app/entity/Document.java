@@ -26,6 +26,9 @@ public class Document {
     @ManyToOne
     private Department department;
 
+    @NotBlank(message = "Descrição nao pode estar vazia")
+    private String description;
+
     @NotNull
     private String filePath;
 }
