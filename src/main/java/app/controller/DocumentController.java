@@ -109,7 +109,7 @@ public class DocumentController {
         }
     }
 
-    @PutMapping(value = "/{id}", consumes = "multipart/form-data")
+    @PutMapping(value = "edit/{id}", consumes = "multipart/form-data")
     public ResponseEntity<String> updateDocument(
             @PathVariable Long id,
             @RequestParam("file") MultipartFile file,
