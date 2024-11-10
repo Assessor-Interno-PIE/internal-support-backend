@@ -94,4 +94,33 @@ public class DocumentService {
         }
     }
 
+    public Document updateDocument(Long id, MultipartFile file, String title, String description, Long departmentId) throws IOException {
+        return documentRepository.findById(id)
+                .map(document -> {
+                    try {
+                        document.setTitle(title);
+                        document.setDescription(description);
+
+                        if (departmentId != null) {
+                            Department department = departmentRepository.findById(departmentId)
+                                    .orElseThrow(() -> new IllegalArgumentException("Departamento não encontrado"));
+                            document.setDepartment(department);
+                        }
+
+                        if (file != null && !file.isEmpty()) {
+                            String originalFilename = file.getOriginalFilename();
+                            String filename = UUID.randomUUID() + "_" + originalFilename;
+                            Path filePath = Paths.get(uploadPath, filename);
+                            file.transferTo(filePath);
+                            document.setFilePath(filePath.toString());
+                        }
+
+                        return documentRepository.save(document);
+                    } catch (IOException e) {
+                        throw new RuntimeException("Erro ao atualizar o arquivo", e);
+                    }
+                })
+                .orElseThrow(() -> new IllegalArgumentException("Documento com o ID fornecido não foi encontrado."));
+    }
+
 }

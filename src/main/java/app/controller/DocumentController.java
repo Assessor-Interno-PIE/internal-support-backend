@@ -108,4 +108,19 @@ public class DocumentController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
+
+    @PutMapping(value = "/{id}", consumes = "multipart/form-data")
+    public ResponseEntity<String> updateDocument(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("title") String title,
+            @RequestParam("description") String description,
+            @RequestParam("departmentId") Long departmentId) {
+        try {
+            Document updatedDocument = documentService.updateDocument(id, file, title, description, departmentId);
+            return new ResponseEntity<>("Documento atualizado com sucesso! ID do documento: " + updatedDocument.getId(), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Erro ao atualizar o documento: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
