@@ -98,4 +98,14 @@ public class DocumentController {
         List<Document> documents = documentService.findDocumentsByTitleContaining(keyword);
         return ResponseEntity.ok(documents);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteDocument(@PathVariable Long id) {
+        try {
+            documentService.deleteDocumentById(id);
+            return new ResponseEntity<>("Documento deletado com sucesso!", HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
 }

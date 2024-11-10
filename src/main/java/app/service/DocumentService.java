@@ -86,4 +86,12 @@ public class DocumentService {
         return documentRepository.findByTitleContaining(keyword);
     }
 
+    public void deleteDocumentById(Long id) {
+        if (documentRepository.existsById(id)) {
+            documentRepository.deleteById(id);
+        } else {
+            throw new IllegalArgumentException("Documento com o ID fornecido não foi encontrado.");
+        }
+    }
+
 }
