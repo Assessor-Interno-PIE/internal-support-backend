@@ -13,7 +13,7 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-    @PostMapping("/login")
+    @GetMapping("/login")
     public ResponseEntity<User> login(@RequestParam String username, @RequestParam String password) {
         return authService.authenticate(username, password)
                 .map(ResponseEntity::ok)
