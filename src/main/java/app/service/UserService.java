@@ -56,6 +56,7 @@ public class UserService {
                     user.setName(updatedUser.getName());
                     user.setPassword(updatedUser.getPassword());
                     user.setDepartment(updatedUser.getDepartment());
+                    user.setIsAdmin(updatedUser.getIsAdmin());
                     return userRepository.save(user);
                 })
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado com id: " + id));
