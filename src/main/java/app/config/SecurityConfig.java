@@ -38,6 +38,9 @@ public class SecurityConfig  {
 		.authorizeHttpRequests((requests) -> requests
 				.requestMatchers("/api/login").permitAll()
 				.requestMatchers("/api/register").permitAll()
+				.requestMatchers("/api/documents").permitAll()
+				.requestMatchers("/api/users").permitAll()
+				.requestMatchers("/api/departments").permitAll()
 				.anyRequest().authenticated())
 		.authenticationProvider(authenticationProvider)
 		.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
