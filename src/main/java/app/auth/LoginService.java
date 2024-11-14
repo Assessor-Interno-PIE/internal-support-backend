@@ -1,6 +1,7 @@
 //AuthenticationService.java
 package app.auth;
 
+import app.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,14 +20,14 @@ public class LoginService {
 	private AuthenticationManager authenticationManager;
 
 
-	public String logar(Login login) {
+	public String userLogin(Login login) {
 		authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(
 						login.getUsername(),
 						login.getPassword()
 						)
 				);
-		Usuario user = repository.findByUsername(login.getUsername()).get();
+		User user = repository.findByUsername(login.getUsername()).get();
 		String jwtToken = jwtService.generateToken(user);
 		
 		return jwtToken;
