@@ -10,5 +10,4 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByDepartment(Department department);
     List<User> findByNameContaining(String keyword);
-    Optional<User> findByUsernameAndPassword(String username, String password);
 }
