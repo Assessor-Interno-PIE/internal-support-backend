@@ -29,7 +29,7 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();
-        String role = (this.isAdmin == 1) ? "ROLE_ADMIN" : "ROLE_USER";
+        String role = (this.isAdmin == 1) ? "ADMIN" : "USER";
         authorities.add(new SimpleGrantedAuthority(role));
         return authorities;
     }
