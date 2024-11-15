@@ -18,9 +18,9 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+
     @Autowired
     private JwtServiceGenerator jwtService;
-
 
     @PostMapping("/login")
     public ResponseEntity<String> userLogin(@RequestBody Login login) {
@@ -35,9 +35,15 @@ public class AuthController {
         }
     }
 
-//    @PostMapping("/register")
-//    public ResponseEntity<Map<String, String>> registerUser(@RequestBody User input) {
-//        return ResponseEntity.ok("HI");
-//    }
-
+    @PostMapping("/register")
+    public ResponseEntity<String> userRegister(@RequestBody Registration registration) {
+        try {
+            String token = authService.userRegister(registration);
+            return ResponseEntity.ok(token);
+        }catch (AuthenticationException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+        }catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+    }
 }

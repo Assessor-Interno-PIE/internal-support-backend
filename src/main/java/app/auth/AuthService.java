@@ -38,4 +38,19 @@ public class AuthService {
         return jwtService.generateToken(user);
 	}
 
+	public String userRegister(Registration registration) {
+		String encodedPassword = passwordEncoder.encode(registration.getPassword());
+
+		User user = new User();
+		user.setName(registration.getName());
+		user.setUsername(registration.getUsername());
+		user.setPassword(encodedPassword);
+		user.setDepartment(registration.getDepartment());
+		user.setIsAdmin(0);
+
+		userRepository.save(user);
+
+		return jwtService.generateToken(user);
+	}
+
 }
