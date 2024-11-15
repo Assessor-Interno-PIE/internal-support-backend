@@ -1,6 +1,5 @@
 package app.controller;
 
-import app.entity.Document;
 import app.entity.User;
 import app.service.UserService;
 import jakarta.validation.Valid;
