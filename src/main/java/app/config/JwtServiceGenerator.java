@@ -35,8 +35,8 @@ public class JwtServiceGenerator {
               .setClaims(extraClaims)
               .setSubject(userDetails.getUsername())
               .setIssuedAt(new Date(System.currentTimeMillis()))
-              .setExpiration(new Date(new Date().getTime() + 3600000 * JwtConfig.HORAS_EXPIRACAO_TOKEN))
-              .signWith(getSigningKey(), JwtConfig.ALGORITMO_ASSINATURA)
+              .setExpiration(new Date(new Date().getTime() + 3600000 * JwtConfig.TOKEN_EXPIRATION_TIME))
+              .signWith(getSigningKey(), JwtConfig.SIGNATURE_ALGORITHM)
               .compact();
   }
   
