@@ -22,8 +22,9 @@ public class AuthService {
 	private AuthenticationManager authenticationManager;
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 
 	public String userLogin(Login login) {
@@ -39,18 +40,19 @@ public class AuthService {
 	}
 
 	public String userRegister(Registration registration) {
-		String encodedPassword = passwordEncoder.encode(registration.getPassword());
 
 		User user = new User();
 		user.setName(registration.getName());
 		user.setUsername(registration.getUsername());
-		user.setPassword(encodedPassword);
+		user.setPassword(passwordEncoder.encode(registration.getPassword()));
 		user.setDepartment(registration.getDepartment());
 		user.setIsAdmin(0);
 
 		userRepository.save(user);
+		String token = jwtService.generateToken(user);
+		System.out.println("Token gerado: " + token);  // Adicione este log para depuração
 
-		return jwtService.generateToken(user);
+		return token;
 	}
 
 }

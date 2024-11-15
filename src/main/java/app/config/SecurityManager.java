@@ -25,7 +25,6 @@ public class SecurityManager {
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-
 	
 	@Bean
 	public AuthenticationProvider authenticationProvider() {
@@ -46,6 +45,5 @@ public class SecurityManager {
 		return username -> authRepository.findByUsername(username)
 				.orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado") );
 	}
-
 
 }

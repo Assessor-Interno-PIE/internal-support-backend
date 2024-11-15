@@ -41,6 +41,9 @@ public class SecurityConfig  {
 				.requestMatchers("/api/documents").permitAll()
 				.requestMatchers("/api/users").permitAll()
 				.requestMatchers("/api/departments").permitAll()
+				.requestMatchers("/api/departments/find-all").permitAll()
+				.requestMatchers("/api/register").permitAll()
+				.requestMatchers("/api/users/save").permitAll()
 				.anyRequest().authenticated())
 		.authenticationProvider(authenticationProvider)
 		.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
@@ -48,7 +51,6 @@ public class SecurityConfig  {
 
 		return http.build();
 	}
-	
 	
 	@Bean
 	public FilterRegistrationBean<CorsFilter> corsFilter() {
