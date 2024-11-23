@@ -28,6 +28,7 @@ public class JwtServiceGenerator {
       extraClaims.put("username", userDetails.getUsername());
       extraClaims.put("id", userDetails.getId().toString());
       extraClaims.put("isAdmin", userDetails.getIsAdmin());
+      extraClaims.put("department", userDetails.getDepartment());
 	  
       
       return Jwts
