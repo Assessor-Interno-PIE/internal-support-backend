@@ -40,7 +40,7 @@ public class SecurityConfig  {
 				.requestMatchers("/api/register").permitAll()
 				.requestMatchers("/api/documents").permitAll()
 				.requestMatchers("/api/users").permitAll()
-				.requestMatchers("/api/departments").permitAll()
+				.requestMatchers("/api/departments/").permitAll()
 				.requestMatchers("/api/departments/find-all").permitAll()
 				.requestMatchers("/api/register").permitAll()
 				.requestMatchers("/api/users/save").permitAll()
