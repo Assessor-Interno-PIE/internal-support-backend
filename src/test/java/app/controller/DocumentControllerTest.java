@@ -279,6 +279,21 @@ public class DocumentControllerTest {
         verify(documentService, times(1)).downloadFile(1L);
     }
 
+    @Test
+    public void testDownloadDocumentSuccess() throws Exception {
+        Resource mockResource = mock(Resource.class);
+        when(mockResource.getFilename()).thenReturn("document.pdf");
+
+        when(documentService.downloadFile(1L)).thenReturn(mockResource);
+
+        mockMvc.perform(get("/api/documents/download/1")
+                        .accept(MediaType.APPLICATION_OCTET_STREAM))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"document.pdf\""))
+                .andExpect(content().contentType(MediaType.APPLICATION_PDF));
+
+        verify(documentService, times(1)).downloadFile(1L);
+    }
 
 
 }
