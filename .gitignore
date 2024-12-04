@@ -26,6 +26,8 @@
 .project
 .classpath
 .settings/
+/downloads
+.properties
 
 # NetBeans
 nbproject/private/
