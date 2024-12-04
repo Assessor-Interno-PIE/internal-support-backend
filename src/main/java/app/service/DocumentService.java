@@ -67,6 +67,7 @@ public class DocumentService {
                 .orElseThrow(() -> new RuntimeException("Documento não encontrado com id: " + id));
     }
 
+
     public List<Document> findAll() {
         List<Document> documents = documentRepository.findAll();
         if (documents.isEmpty()) {

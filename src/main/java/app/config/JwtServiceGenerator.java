@@ -25,8 +25,10 @@ public class JwtServiceGenerator {
 	  
 	  //AQUI VOCÊ PODE COLOCAR O QUE MAIS VAI COMPOR O PAYLOAD DO TOKEN
       Map<String, Object> extraClaims = new HashMap<>();
-      extraClaims.put("username", userDetails.getUsername());
       extraClaims.put("id", userDetails.getId().toString());
+      extraClaims.put("name", userDetails.getName());
+      extraClaims.put("username", userDetails.getUsername());
+      extraClaims.put("department", userDetails.getDepartment());
       extraClaims.put("isAdmin", userDetails.getIsAdmin());
 	  
       
