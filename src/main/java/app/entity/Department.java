@@ -18,7 +18,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Department {
+public class   Department {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

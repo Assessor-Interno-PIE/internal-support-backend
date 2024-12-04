@@ -39,7 +39,7 @@ public class SecurityConfig  {
 				.requestMatchers("/api/login").permitAll()
 				.requestMatchers("/api/register").permitAll()
 				.requestMatchers("/api/documents").permitAll()
-				.requestMatchers("/api/users").permitAll()
+				.requestMatchers("/api/users/**").hasRole("ADMIN")
 				.requestMatchers("/api/departments").permitAll()
 				.requestMatchers("/api/departments/find-all").permitAll()
 				.requestMatchers("/api/register").permitAll()
