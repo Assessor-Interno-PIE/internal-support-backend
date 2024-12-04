@@ -47,7 +47,7 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado com id: " + id));
         userRepository.deleteById(id);
-        return "Usuário deletado com sucesso.";
+        return "Usuario deletado com sucesso.";
     }
 
     public User updateById(Long id, User updatedUser) {
