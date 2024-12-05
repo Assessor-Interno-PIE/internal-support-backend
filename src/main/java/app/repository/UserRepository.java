@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByDepartment(Department department);
     List<User> findByNameContaining(String keyword);
+    User findByUsername(String username);
 }
