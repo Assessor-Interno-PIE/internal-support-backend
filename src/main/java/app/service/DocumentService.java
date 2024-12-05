@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -75,6 +77,14 @@ public class DocumentService {
         } else {
             return documents;
         }
+    }
+
+    public Page<Document> findAllPaginated(Pageable pageable) {
+        Page<Document> documents = documentRepository.findAll(pageable);
+        if (documents.isEmpty()) {
+            throw new RuntimeException("Não há documentos registrados!");
+        }
+        return documents;
     }
 
     public List<Document> findDocumentsByDepartment(Long departmentId) {
