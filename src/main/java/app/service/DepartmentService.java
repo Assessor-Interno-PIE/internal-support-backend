@@ -4,6 +4,8 @@ import app.entity.Department;
 import app.repository.DepartmentRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,6 +33,14 @@ public class DepartmentService {
         } else {
             return departments;
         }
+    }
+
+    public Page<Department> findAllPaginated(Pageable pageable) {
+        Page<Department> departments = departmentRepository.findAll(pageable);
+        if (departments.isEmpty()) {
+            throw new RuntimeException("Não há departamentos registrados!");
+        }
+        return departments;
     }
 
     public String deleteById(@Valid Long id) {
