@@ -7,6 +7,8 @@ import app.repository.DepartmentRepository;
 import app.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,6 +43,15 @@ public class UserService {
         } else {
             return users;
         }
+    }
+
+    public Page<User> findAllPaginated(Pageable pageable) {
+        Page<User> users = userRepository.findAll(pageable);
+        List<User> userList = userRepository.findAll();
+        if (userList.isEmpty()) {
+            throw new RuntimeException("Não há usuários registrados!");
+        }
+        return users;
     }
 
     public String deleteById(Long id) {

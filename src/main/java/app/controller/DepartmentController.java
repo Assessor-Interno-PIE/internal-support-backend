@@ -5,6 +5,9 @@ import app.entity.Department;
 import app.service.DepartmentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +39,16 @@ public class DepartmentController {
         List<Department> departments = departmentService.findAll();
         return new ResponseEntity<>(departments, HttpStatus.OK);
     }
+
+    @GetMapping("/find-all/paginated")
+    public ResponseEntity<Page<Department>> findAllPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<Department> departments = departmentService.findAllPaginated(pageRequest);
+        return new ResponseEntity<>(departments, HttpStatus.OK);
+    }
+
 
     @DeleteMapping("/delete-by-id/{id}")
     public ResponseEntity<String> deleteById(@PathVariable Long id) {
