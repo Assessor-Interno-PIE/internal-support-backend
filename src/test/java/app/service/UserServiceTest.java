@@ -62,9 +62,7 @@ class UserServiceTest {
     void testSaveUser_DepartmentNotFound() {
         when(departmentRepository.existsById(1L)).thenReturn(false);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            userService.save(user);
-        });
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> userService.save(user));
 
         assertEquals("Departamento não encontrado.", exception.getMessage());
     }
@@ -84,9 +82,7 @@ class UserServiceTest {
     void testFindById_NotFound() {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            userService.findById(1L);
-        });
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.findById(1L));
 
         assertEquals("Usuário não encontrado com id: 1", exception.getMessage());
     }
@@ -105,9 +101,7 @@ class UserServiceTest {
     void testDeleteById_NotFound() {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            userService.deleteById(1L);
-        });
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.deleteById(1L));
 
         assertEquals("Usuário não encontrado com id: 1", exception.getMessage());
     }
@@ -150,9 +144,7 @@ class UserServiceTest {
 
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            userService.updateById(1L, updatedUser);
-        });
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.updateById(1L, updatedUser));
 
         assertEquals("Usuário não encontrado com id: 1", exception.getMessage());
     }
@@ -173,9 +165,7 @@ class UserServiceTest {
     void testFindUsersByDepartment_DepartmentNotFound() {
         when(departmentRepository.findById(1L)).thenReturn(Optional.empty());
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            userService.findUsersByDepartment(1L);
-        });
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> userService.findUsersByDepartment(1L));
 
         assertEquals("Departamento não encontrado", exception.getMessage());
     }

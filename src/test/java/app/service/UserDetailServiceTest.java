@@ -34,31 +34,24 @@ public class UserDetailServiceTest {
 
     @Test
     void testLoadUserByUsername_Success() {
-        // Simulando o comportamento do repositório
+
         when(userRepository.findByUsername("john_doe")).thenReturn(user);
 
-        // Chamando o método a ser testado
         UserDetails userDetails = userDetailService.loadUserByUsername("john_doe");
 
-        // Verificando se o retorno é correto
         assertNotNull(userDetails);
         assertEquals("john_doe", userDetails.getUsername());
         assertEquals("password123", userDetails.getPassword());
         assertTrue(userDetails.getAuthorities().stream()
                 .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN")));
 
-        // Verificando que o repositório foi chamado
         verify(userRepository).findByUsername("john_doe");
     }
 
     @Test
     void testLoadUserByUsername_UserNotFound() {
-        // Simulando o caso em que o usuário não é encontrado
         when(userRepository.findByUsername("non_existing_user")).thenReturn(null);
 
-        // Verificando se a exceção é lançada
-        assertThrows(UsernameNotFoundException.class, () -> {
-            userDetailService.loadUserByUsername("non_existing_user");
-        });
+        assertThrows(UsernameNotFoundException.class, () -> userDetailService.loadUserByUsername("non_existing_user"));
     }
 }

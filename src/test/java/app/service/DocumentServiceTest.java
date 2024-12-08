@@ -6,7 +6,6 @@ import app.entity.User;
 import app.repository.DocumentRepository;
 import app.repository.DepartmentRepository;
 import app.repository.UserRepository;
-import app.service.DocumentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -84,9 +83,7 @@ public class DocumentServiceTest {
     void testDownloadFile_NotFound() {
         when(documentRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            documentService.downloadFile(1L);
-        });
+        assertThrows(IllegalArgumentException.class, () -> documentService.downloadFile(1L));
     }
 
     @Test
@@ -104,8 +101,7 @@ public class DocumentServiceTest {
     void testFindById_NotFound() {
         when(documentRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> {
-            documentService.findById(1L);
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {documentService.findById(1L);
         });
     }
 
