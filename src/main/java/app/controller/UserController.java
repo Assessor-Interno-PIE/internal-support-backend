@@ -41,7 +41,7 @@ public class UserController {
     @GetMapping("/find-all/paginated")
     public ResponseEntity<Page<User>> findAllPaginated(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "5") int size) {
         Page<User> users = userService.findAllPaginated(PageRequest.of(page, size));
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
