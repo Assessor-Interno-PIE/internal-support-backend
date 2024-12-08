@@ -43,11 +43,12 @@ public class DepartmentController {
     @GetMapping("/find-all/paginated")
     public ResponseEntity<Page<Department>> findAllPaginated(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "5") int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
         Page<Department> departments = departmentService.findAllPaginated(pageRequest);
         return new ResponseEntity<>(departments, HttpStatus.OK);
     }
+
 
     @DeleteMapping("/delete-by-id/{id}")
     public ResponseEntity<String> deleteById(@PathVariable Long id) {

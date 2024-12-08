@@ -81,7 +81,8 @@ public class DocumentService {
 
     public Page<Document> findAllPaginated(Pageable pageable) {
         Page<Document> documents = documentRepository.findAll(pageable);
-        if (documents.isEmpty()) {
+        List<Document> documentList = documentRepository.findAll();
+        if (documentList.isEmpty()) {
             throw new RuntimeException("Não há documentos registrados!");
         }
         return documents;

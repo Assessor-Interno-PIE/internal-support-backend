@@ -47,7 +47,8 @@ public class UserService {
 
     public Page<User> findAllPaginated(Pageable pageable) {
         Page<User> users = userRepository.findAll(pageable);
-        if (users.isEmpty()) {
+        List<User> userList = userRepository.findAll();
+        if (userList.isEmpty()) {
             throw new RuntimeException("Não há usuários registrados!");
         }
         return users;
