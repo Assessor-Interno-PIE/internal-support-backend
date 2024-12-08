@@ -37,8 +37,7 @@ public class DepartmentService {
 
     public Page<Department> findAllPaginated(Pageable pageable) {
         Page<Department> departments = departmentRepository.findAll(pageable);
-        List<Department> departmentList = departmentRepository.findAll();
-        if (departmentList.isEmpty()) {
+        if (departments.isEmpty()) {
             throw new RuntimeException("Não há departamentos registrados!");
         }
         return departments;
