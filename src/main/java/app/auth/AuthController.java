@@ -1,6 +1,7 @@
 package app.auth;
 
 import app.config.JwtServiceGenerator;
+import app.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,14 +33,14 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<String> userRegister(@RequestBody Registration registration) {
+    @PutMapping("/users/update-by-id/{id}")
+    public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody UpdateUserRequest updateUserRequest) {
         try {
-            String token = authService.userRegister(registration);
-            return ResponseEntity.ok(token);
-        }catch (AuthenticationException ex) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
-        }catch (Exception e) {
+            User updatedUser = authService.updateById(id, updateUserRequest);
+            return ResponseEntity.ok("Usuário atualizado com sucesso: " + updatedUser.getId());
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
     }

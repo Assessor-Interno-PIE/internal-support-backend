@@ -55,4 +55,24 @@ public class AuthService {
 		return token;
 	}
 
+	public User updateById(Long id, UpdateUserRequest updateUserRequest) {
+		return userRepository.findById(id)
+				.map(user -> {
+					if (updateUserRequest.getName() != null) {
+						user.setName(updateUserRequest.getName());
+					}
+					if (updateUserRequest.getPassword() != null && !updateUserRequest.getPassword().isEmpty()) {
+						user.setPassword(passwordEncoder.encode(updateUserRequest.getPassword()));
+					}
+					if (updateUserRequest.getDepartment() != null) {
+						user.setDepartment(updateUserRequest.getDepartment());
+					}
+					if (updateUserRequest.getIsAdmin() != null) {
+						user.setIsAdmin(updateUserRequest.getIsAdmin());
+					}
+					return userRepository.save(user);
+				})
+				.orElseThrow(() -> new RuntimeException("Usuário não encontrado com id: " + id));
+	}
+
 }

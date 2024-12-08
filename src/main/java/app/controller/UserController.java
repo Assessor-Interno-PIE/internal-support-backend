@@ -52,11 +52,12 @@ public class UserController {
         return new ResponseEntity<>(responseMessage, HttpStatus.OK);
     }
 
+    /*
     @PutMapping("/update-by-id/{id}")
     public ResponseEntity<User> updateById(@Valid @PathVariable Long id, @RequestBody User updatedUser) {
         User user = userService.updateById(id, updatedUser);
         return new ResponseEntity<>(user, HttpStatus.OK);
-    }
+    }*/
 
     @GetMapping("/by-department/{id}")
     public ResponseEntity<List<User>> getUsersByDepartment(@PathVariable Long id) {
