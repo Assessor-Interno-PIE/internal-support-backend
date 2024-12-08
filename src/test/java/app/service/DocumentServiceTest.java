@@ -103,6 +103,8 @@ public class DocumentServiceTest {
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {documentService.findById(1L);
         });
+
+        assertEquals("Documento não encontrado com id: 1", exception.getMessage());
     }
 
     @Test
