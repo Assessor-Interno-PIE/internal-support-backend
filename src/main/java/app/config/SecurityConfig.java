@@ -13,6 +13,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -35,7 +37,8 @@ public class SecurityConfig  {
 		http    
 		.csrf(AbstractHttpConfigurer::disable)
 		.cors(AbstractHttpConfigurer::disable)
-		.authorizeHttpRequests((requests) -> requests
+				//.cors(customizer -> customizer.configurationSource(corsConfigurationSource())) // Ative o CORS
+				.authorizeHttpRequests((requests) -> requests
 				.requestMatchers("/api/login").permitAll()
 				.requestMatchers("/api/token/generate").permitAll()
 				.requestMatchers("/api/register").permitAll()
@@ -49,6 +52,7 @@ public class SecurityConfig  {
 				.requestMatchers("/api/departments/find-all").permitAll()
 				.requestMatchers("/api/register").permitAll()
 				.requestMatchers("/api/users/save").permitAll()
+						.requestMatchers("/api/users/*/password").permitAll()
 				.anyRequest().authenticated())
 		.authenticationProvider(authenticationProvider)
 		.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
@@ -56,7 +60,7 @@ public class SecurityConfig  {
 
 		return http.build();
 	}
-	
+
 	@Bean
 	public FilterRegistrationBean<CorsFilter> corsFilter() {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -65,13 +69,19 @@ public class SecurityConfig  {
 		//config.addAllowedOrigin("http://localhost:4200");
 		config.setAllowedOriginPatterns(Arrays.asList("*"));
 		config.setAllowedHeaders(Arrays.asList(HttpHeaders.AUTHORIZATION,HttpHeaders.CONTENT_TYPE,HttpHeaders.ACCEPT));
-		config.setAllowedMethods(Arrays.asList(HttpMethod.GET.name(),HttpMethod.POST.name(),HttpMethod.PUT.name(),HttpMethod.DELETE.name()));
+		config.setAllowedMethods(Arrays.asList(HttpMethod.GET.name(),HttpMethod.POST.name(),HttpMethod.PUT.name(),HttpMethod.DELETE.name(),HttpMethod.PATCH.name()));
 		config.setMaxAge(3600L);
 		source.registerCorsConfiguration("/**", config);
 		FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<CorsFilter>(new CorsFilter(source));
 		bean.setOrder(-102);
 		return bean;
 	}
-	
+
+	// Alter User Password in config area
+	@Bean
+	public PasswordEncoder bcryptPasswordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
 
 }

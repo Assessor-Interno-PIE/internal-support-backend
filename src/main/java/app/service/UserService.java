@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -83,4 +84,16 @@ public class UserService {
         return userRepository.findByNameContaining(keyword);
     }
 
+    public void atualizarSenha(Long id, String novaSenha) {
+        System.out.println("Buscando usuário com ID: " + id);  // Log para verificar o ID
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        // Criptografando a nova senha
+        String senhaCriptografada = new BCryptPasswordEncoder().encode(novaSenha);
+
+        // Atualizando o atributo senha
+        user.setPassword(senhaCriptografada);
+        userRepository.save(user);
+    }
 }
