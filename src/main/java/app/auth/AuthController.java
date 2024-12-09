@@ -33,6 +33,18 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<String> userRegister(@RequestBody Registration registration) {
+        try {
+            String token = authService.userRegister(registration);
+            return ResponseEntity.ok(token);
+        }catch (AuthenticationException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+        }catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @PutMapping("/users/update-by-id/{id}")
     public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody UpdateUserRequest updateUserRequest) {
         try {
