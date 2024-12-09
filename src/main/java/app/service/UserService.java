@@ -62,6 +62,7 @@ public class UserService {
         return "Usuario deletado com sucesso.";
     }
 
+    /*
     public User updateById(Long id, User updatedUser) {
         return userRepository.findById(id)
                 .map(user -> {
@@ -72,7 +73,7 @@ public class UserService {
                     return userRepository.save(user);
                 })
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado com id: " + id));
-    }
+    }*/
 
     public List<User> findUsersByDepartment(Long departmentId) {
         Department department = departmentRepository.findById(departmentId)
