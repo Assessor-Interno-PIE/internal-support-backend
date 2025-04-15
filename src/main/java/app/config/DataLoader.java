@@ -1,8 +1,10 @@
 package app.config;
 
 import app.entity.Department;
+import app.entity.Document;
 import app.entity.User;
 import app.repository.DepartmentRepository;
+import app.repository.DocumentRepository;
 import app.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -17,6 +19,9 @@ public class DataLoader implements CommandLineRunner {
 
     @Autowired
     private DepartmentRepository departmentRepository;
+
+    @Autowired
+    private DocumentRepository documentRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -47,6 +52,13 @@ public class DataLoader implements CommandLineRunner {
             user.setIsAdmin(0);
             user.setDepartment(defaultDepartment);
             userRepository.save(user);
+        }
+        if (documentRepository.findByTitleContainingIgnoreCase("base") == null) {
+            Document document = new Document();
+            document.setDepartment(defaultDepartment);
+            document.setTitle("base");
+            document.setDescription("base");
+            documentRepository.save(document);
         }
     }
 }

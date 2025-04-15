@@ -29,6 +29,7 @@ public class Document {
     @NotBlank(message = "Descrição nao pode estar vazia")
     private String description;
 
-    @NotNull
-    private String filePath;
+    @Lob
+    @Column(name = "filePath", columnDefinition = "LONGBLOB")
+    private byte[] filePath;
 }
