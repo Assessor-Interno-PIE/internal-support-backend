@@ -1,75 +1,90 @@
 package app.config;
 
-import java.util.Arrays;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.keycloak.adapters.KeycloakConfigResolver;
+import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
+import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.AuthenticatedPrincipalOAuth2AuthorizedClientRepository;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 @Configuration
-@EnableWebSecurity
-public class SecurityConfig  {
+public class SecurityConfig {
 
-	@Autowired
-	private JwtAuthenticationFilter jwtAuthFilter;
+	@Bean
+	public KeycloakConfigResolver keycloakConfigResolver() {
+		return new KeycloakSpringBootConfigResolver();
+	}
 
-	@Autowired
-	private AuthenticationProvider authenticationProvider;
-	
+	@Bean
+	public ClientRegistrationRepository clientRegistrationRepository() {
+		ClientRegistration clientRegistration = ClientRegistration
+				.withRegistrationId("keycloak")
+				.clientId("internal_support")
+				.clientSecret("senha123")
+				.authorizationUri("http://localhost:9090/realms/internal_support/protocol/openid-connect/auth")
+				.tokenUri("http://localhost:9090/realms/internal_support/protocol/openid-connect/token")
+				.jwkSetUri("http://localhost:9090/realms/internal_support/protocol/openid-connect/certs")
+				.userInfoUri("http://localhost:9090/realms/internal_support/protocol/openid-connect/userinfo")
+				.redirectUri("http://localhost:9090/login/oauth2/code/keycloak")
+				.clientName("Keycloak")
+				.scope("openid", "profile", "email")
+				.authorizationGrantType(org.springframework.security.oauth2.core.AuthorizationGrantType.AUTHORIZATION_CODE)
+				.build();
+
+		return new InMemoryClientRegistrationRepository(clientRegistration);
+	}
+
+	@Bean
+	public OAuth2AuthorizedClientService authorizedClientService(ClientRegistrationRepository repo) {
+		return new InMemoryOAuth2AuthorizedClientService(repo);
+	}
+
+	@Bean
+	public OAuth2AuthorizedClientRepository authorizedClientRepository(OAuth2AuthorizedClientService service) {
+		return new AuthenticatedPrincipalOAuth2AuthorizedClientRepository(service);
+	}
+
+	@Bean
+	public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+		AuthenticationManagerBuilder authBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+		authBuilder.authenticationProvider(keycloakAuthenticationProvider());
+		return authBuilder.build();
+	}
+
+	@Bean
+	public KeycloakAuthenticationProvider keycloakAuthenticationProvider() {
+		return new KeycloakAuthenticationProvider();
+	}
+
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http    
-		.csrf(AbstractHttpConfigurer::disable)
-		.cors(AbstractHttpConfigurer::disable)
-		.authorizeHttpRequests((requests) -> requests
-				.requestMatchers("/api/login").permitAll()
-				.requestMatchers("/api/register").permitAll()
-				.requestMatchers("/api/documents/save").hasRole("ADMIN")
-				.requestMatchers("/api/documents/").hasRole("ADMIN")
-				.requestMatchers("/api/documents/edit/**").permitAll()
-				.requestMatchers("/api/users/**").hasRole("ADMIN")
-				.requestMatchers("/api/departments/save").hasRole("ADMIN")
-				.requestMatchers("/api/departments/delete-by-id/**").hasRole("ADMIN")
-				.requestMatchers("/api/departments/update-by-id/**").hasRole("ADMIN")
-				.requestMatchers("/api/departments/find-all").permitAll()
-				.requestMatchers("/api/register").permitAll()
-				.requestMatchers("/api/users/save").permitAll()
-				.anyRequest().authenticated())
-		.authenticationProvider(authenticationProvider)
-		.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-		.sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+		http
+				.authorizeRequests()
+				.requestMatchers("/api/public/**").permitAll()
+				.requestMatchers("/api/**").hasRole("USER")
+				.anyRequest().authenticated()
+				.and()
+				.oauth2Login()
+				.permitAll();
 
 		return http.build();
 	}
-	
-	@Bean
-	public FilterRegistrationBean<CorsFilter> corsFilter() {
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowCredentials(true);
-		config.addAllowedOrigin("http://localhost:4200");
-		config.setAllowedHeaders(Arrays.asList(HttpHeaders.AUTHORIZATION,HttpHeaders.CONTENT_TYPE,HttpHeaders.ACCEPT));
-		config.setAllowedMethods(Arrays.asList(HttpMethod.GET.name(),HttpMethod.POST.name(),HttpMethod.PUT.name(),HttpMethod.DELETE.name()));
-		config.setMaxAge(3600L);
-		source.registerCorsConfiguration("/**", config);
-		FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<CorsFilter>(new CorsFilter(source));
-		bean.setOrder(-102);
-		return bean;
-	}
-	
-
 }

@@ -16,26 +16,26 @@ import app.auth.AuthRepository;
 
 @Configuration
 public class SecurityManager {
-	
+
 	@Autowired
 	private AuthRepository authRepository;
-	
-	
+
+
 	@Bean
-	public PasswordEncoder passwordEncoder() {
+	public PasswordEncoder customPasswordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-	
+
 	@Bean
 	public AuthenticationProvider authenticationProvider() {
 		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
 		authProvider.setUserDetailsService(userDetailsService());
-		authProvider.setPasswordEncoder(passwordEncoder());
+		authProvider.setPasswordEncoder(customPasswordEncoder());
 		return authProvider;
 	}
 
 	@Bean
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+	public AuthenticationManager customAuthenticationManager(AuthenticationConfiguration config) throws Exception {
 		return config.getAuthenticationManager();
 	}
 
