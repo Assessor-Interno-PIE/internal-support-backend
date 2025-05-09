@@ -2,7 +2,6 @@ package app.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,7 +21,9 @@ public class Document {
     @NotBlank(message = "O título não pode estar vazio")
     private String title;
 
-    private String filePath;
+    @Lob
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] filePath;
 
     private String departmentName;
 

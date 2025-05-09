@@ -1,8 +1,6 @@
 package app.service;
 
-import app.entity.Department;
 import app.entity.Document;
-import app.repository.DepartmentRepository;
 import app.repository.DocumentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -21,19 +19,14 @@ public class DocumentService {
     @Autowired
     private DocumentRepository documentRepository;
 
-    @Autowired
-    private DepartmentRepository departmentRepository;
-
     // Salvar novo documento
-    public Document save(MultipartFile pdfFile, Long departmentId, String title, String description) throws IOException {
-        Department department = departmentRepository.findById(departmentId)
-                .orElseThrow(() -> new IllegalArgumentException("Departamento não encontrado"));
-
+    public Document save(MultipartFile pdfFile, String departmentName, String title, String description, String addedBy) throws IOException {
         Document document = new Document();
-        document.setDepartment(department);
+        document.setDepartmentName(departmentName);
         document.setTitle(title);
         document.setDescription(description);
-        document.setFilePath(pdfFile.getBytes());
+        document.setFilePath(pdfFile.getBytes()); // Store raw bytes
+        document.setAddedBy(addedBy);
 
         return documentRepository.save(document);
     }
@@ -76,10 +69,8 @@ public class DocumentService {
     }
 
     // Buscar por departamento
-    public List<Document> findDocumentsByDepartment(Long departmentId) {
-        Department department = departmentRepository.findById(departmentId)
-                .orElseThrow(() -> new IllegalArgumentException("Departamento não encontrado"));
-        return documentRepository.findByDepartment(department);
+    public List<Document> findDocumentsByDepartment(String departmentName) {
+        return documentRepository.findByDepartmentName(departmentName);
     }
 
     // Buscar por título (palavra-chave)
@@ -96,21 +87,16 @@ public class DocumentService {
     }
 
     // Atualizar documento existente
-    public Document updateDocument(Long id, MultipartFile file, String title, String description, Long departmentId) throws IOException {
+    public Document updateDocument(Long id, MultipartFile file, String title, String description, String departmentName) throws IOException {
         Document document = documentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Documento com o ID fornecido não foi encontrado."));
 
         document.setTitle(title);
         document.setDescription(description);
-
-        if (departmentId != null) {
-            Department department = departmentRepository.findById(departmentId)
-                    .orElseThrow(() -> new IllegalArgumentException("Departamento não encontrado"));
-            document.setDepartment(department);
-        }
+        document.setDepartmentName(departmentName);
 
         if (file != null && !file.isEmpty()) {
-            document.setFilePath(file.getBytes());
+            document.setFilePath(file.getBytes()); // Store raw bytes
         }
 
         return documentRepository.save(document);
