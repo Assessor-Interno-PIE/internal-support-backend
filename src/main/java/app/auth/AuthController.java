@@ -1,59 +1,58 @@
 package app.auth;
 
-import app.config.JwtServiceGenerator;
-import app.entity.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api")
-@CrossOrigin("*")
+@RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    @GetMapping("/userinfo")
+    public ResponseEntity<Map<String, Object>> getUserInfo(Principal principal) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Map<String, Object> userInfo = new HashMap<>();
 
-    @Autowired
-    private JwtServiceGenerator jwtService;
+        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
+            userInfo.put("id", jwt.getSubject());
+            userInfo.put("username", jwt.getClaim("preferred_username"));
+            userInfo.put("name", jwt.getClaim("name"));
+            userInfo.put("email", jwt.getClaim("email"));
+            userInfo.put("roles", authentication.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toList()));
 
-    @PostMapping("/login")
-    public ResponseEntity<String> userLogin(@RequestBody Login login) {
-        try {
-            return ResponseEntity.ok(authService.userLogin(login));
-        }catch(AuthenticationException ex) {
-            System.out.println(ex.getMessage());
-            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-        }catch (Exception e) {
-            System.out.println(e.getMessage());
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            // Obter grupos/departamentos
+            List<String> groups = jwt.getClaim("groups");
+            if (groups != null) {
+                userInfo.put("departments", groups.stream()
+                        .filter(group -> group.startsWith("DEPT_"))
+                        .collect(Collectors.toList()));
+            }
         }
+
+        return ResponseEntity.ok(userInfo);
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<String> userRegister(@RequestBody Registration registration) {
-        try {
-            String token = authService.userRegister(registration);
-            return ResponseEntity.ok(token);
-        }catch (AuthenticationException ex) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
-        }catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @PutMapping("/users/update-by-id/{id}")
-    public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody UpdateUserRequest updateUserRequest) {
-        try {
-            User updatedUser = authService.updateById(id, updateUserRequest);
-            return ResponseEntity.ok("Usuário atualizado com sucesso: " + updatedUser.getId());
-        } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
+    // Se precisar de um endpoint de logout manual
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+        SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
+        logoutHandler.logout(request, response, SecurityContextHolder.getContext().getAuthentication());
+        return ResponseEntity.ok().build();
     }
 }
