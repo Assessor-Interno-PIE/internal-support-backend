@@ -1,87 +1,49 @@
 package app.config;
 
-import java.util.Arrays;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
+
+/**
+ * SecurityConfig class configures security settings for the application,
+ * enabling security filters and setting up OAuth2 login and logout behavior.
+ */
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig  {
+public class SecurityConfig {
 
-	@Autowired
-	private JwtAuthenticationFilter jwtAuthFilter;
-
-	@Autowired
-	private AuthenticationProvider authenticationProvider;
-	
-
+	/**
+	 * Configures the security filter chain for handling HTTP requests, OAuth2 login, and logout.
+	 *
+	 * @param http HttpSecurity object to define web-based security at the HTTP level
+	 * @return SecurityFilterChain for filtering and securing HTTP requests
+	 * @throws Exception in case of an error during configuration
+	 */
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http    
-		.csrf(AbstractHttpConfigurer::disable)
-		.cors(AbstractHttpConfigurer::disable)
-				//.cors(customizer -> customizer.configurationSource(corsConfigurationSource())) // Ative o CORS
-				.authorizeHttpRequests((requests) -> requests
-				.requestMatchers("/api/login").permitAll()
-				.requestMatchers("/api/token/generate").permitAll()
-				.requestMatchers("/api/register").permitAll()
-				.requestMatchers("/api/documents/save").hasRole("ADMIN")
-				.requestMatchers("/api/documents/").hasRole("ADMIN")
-				.requestMatchers("/api/documents/edit/**").hasRole("ADMIN")
-				.requestMatchers("/api/users/**").hasRole("ADMIN")
-				.requestMatchers("/api/departments/save").hasRole("ADMIN")
-				.requestMatchers("/api/departments/delete-by-id/**").hasRole("ADMIN")
-				.requestMatchers("/api/departments/update-by-id/**").hasRole("ADMIN")
-				.requestMatchers("/api/departments/find-all").permitAll()
-				.requestMatchers("/api/register").permitAll()
-				.requestMatchers("/api/users/save").permitAll()
-						.requestMatchers("/api/users/*/password").permitAll()
-				.anyRequest().authenticated())
-		.authenticationProvider(authenticationProvider)
-		.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-		.sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		http
+				// Configures authorization rules for different endpoints
+				.authorizeHttpRequests(authorize -> authorize
+						.requestMatchers("/").permitAll() // Allows public access to the root URL
+						.requestMatchers("/menu").authenticated() // Requires authentication to access "/menu"
+						.anyRequest().authenticated() // Requires authentication for any other request
+				)
+				// Configures OAuth2 login settings
+				.oauth2Login(oauth2 -> oauth2
+						.loginPage("/oauth2/authorization/keycloak") // Sets custom login page for OAuth2 with Keycloak
+						.defaultSuccessUrl("/menu", true) // Redirects to "/menu" after successful login
+				)
+				// Configures logout settings
+				.logout(logout -> logout
+						.logoutSuccessUrl("/") // Redirects to the root URL on successful logout
+						.invalidateHttpSession(true) // Invalidates session to clear session data
+						.clearAuthentication(true) // Clears authentication details
+						.deleteCookies("JSESSIONID") // Deletes the session cookie
+				);
 
 		return http.build();
 	}
-
-	@Bean
-	public FilterRegistrationBean<CorsFilter> corsFilter() {
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowCredentials(true);
-		//config.addAllowedOrigin("http://localhost:4200");
-		config.setAllowedOriginPatterns(Arrays.asList("*"));
-		config.setAllowedHeaders(Arrays.asList(HttpHeaders.AUTHORIZATION,HttpHeaders.CONTENT_TYPE,HttpHeaders.ACCEPT));
-		config.setAllowedMethods(Arrays.asList(HttpMethod.GET.name(),HttpMethod.POST.name(),HttpMethod.PUT.name(),HttpMethod.DELETE.name(),HttpMethod.PATCH.name()));
-		config.setMaxAge(3600L);
-		source.registerCorsConfiguration("/**", config);
-		FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<CorsFilter>(new CorsFilter(source));
-		bean.setOrder(-102);
-		return bean;
-	}
-
-	// Alter User Password in config area
-	@Bean
-	public PasswordEncoder bcryptPasswordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
-
-
 }
