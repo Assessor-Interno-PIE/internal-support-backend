@@ -22,14 +22,14 @@ public class Document {
     @NotBlank(message = "O título não pode estar vazio")
     private String title;
 
-    @NotNull(message = "O departamento não pode estar vazio")
-    @ManyToOne
-    private Department department;
+    private String filePath;
+
+    private String departmentName;
 
     @NotBlank(message = "Descrição nao pode estar vazia")
     private String description;
 
-    @Lob
-    @Column(name = "filePath", columnDefinition = "LONGBLOB")
-    private byte[] filePath;
+    private String addedBy;
+
+
 }
