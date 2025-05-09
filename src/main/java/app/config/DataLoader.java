@@ -1,64 +1,39 @@
 package app.config;
 
-import app.entity.Department;
 import app.entity.Document;
-import app.entity.User;
-import app.repository.DepartmentRepository;
 import app.repository.DocumentRepository;
-import app.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DataLoader implements CommandLineRunner {
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private DepartmentRepository departmentRepository;
-
-    @Autowired
     private DocumentRepository documentRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) throws Exception {
-        Department defaultDepartment = departmentRepository.findById(1L).orElseGet(() -> {
-            Department dept = new Department();
-            dept.setId(1L);
-            dept.setName("Default Department");
-            return departmentRepository.save(dept);
-        });
+        // Verifica se já existem documentos no banco
+        if (documentRepository.count() == 0) {
+            // Cria alguns documentos de exemplo
+            Document doc1 = new Document();
+            doc1.setTitle("Manual do Usuário");
+            doc1.setDescription("Manual básico de utilização do sistema");
+            doc1.setDepartmentName("TI");
+            doc1.setAddedBy("admin");
+            doc1.setFilePath(new byte[0]); // Arquivo vazio inicial
 
-        if (userRepository.findByUsername("admin") == null) {
-            User user = new User();
-            user.setName("Admin User");
-            user.setUsername("admin");
-            user.setPassword(passwordEncoder.encode("admin123"));
-            user.setIsAdmin(1);
-            user.setDepartment(defaultDepartment);
-            userRepository.save(user);
-        }
-        if (userRepository.findByUsername("user") == null) {
-            User user = new User();
-            user.setName("Common User");
-            user.setUsername("user");
-            user.setPassword(passwordEncoder.encode("user123"));
-            user.setIsAdmin(0);
-            user.setDepartment(defaultDepartment);
-            userRepository.save(user);
-        }
-        if (documentRepository.findByTitleContainingIgnoreCase("base") == null) {
-            Document document = new Document();
-            document.setDepartment(defaultDepartment);
-            document.setTitle("base");
-            document.setDescription("base");
-            documentRepository.save(document);
+            Document doc2 = new Document();
+            doc2.setTitle("Política de Segurança");
+            doc2.setDescription("Políticas de segurança da empresa");
+            doc2.setDepartmentName("RH");
+            doc2.setAddedBy("admin");
+            doc2.setFilePath(new byte[0]); // Arquivo vazio inicial
+
+            // Salva os documentos
+            documentRepository.save(doc1);
+            documentRepository.save(doc2);
         }
     }
-}
+} 
