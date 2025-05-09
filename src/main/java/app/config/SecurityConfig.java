@@ -7,7 +7,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 
-
 /**
  * SecurityConfig class configures security settings for the application,
  * enabling security filters and setting up OAuth2 login and logout behavior.
