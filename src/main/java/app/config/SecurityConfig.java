@@ -2,6 +2,7 @@ package app.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -36,7 +37,9 @@ public class SecurityConfig {
 						// Endpoints públicos
 						.requestMatchers("/").permitAll() // Allows public access to the root URL
 						.requestMatchers("/menu").authenticated() // Requires authentication to access "/menu"
+						// TESTING ENDPOINTS
 						.requestMatchers("/api/auth/userinfo").permitAll() // PARA O SWAGGER
+						.requestMatchers("/api/auth/check").permitAll()
 						// Document endpoints security
 						.requestMatchers("/api/documents/view/**").authenticated() // View documents requires authentication
 						.requestMatchers("/api/documents/download/**").authenticated() // Download requires authentication
@@ -49,7 +52,8 @@ public class SecurityConfig {
 						.requestMatchers("/api/documents/edit/**").authenticated() // Edit requires authentication
 						.requestMatchers("/api/documents/**").authenticated() // Any other document endpoint requires authentication
 						.anyRequest().authenticated() // Requires authentication for any other request
-				);
+				)
+				.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 
 		return http.build();
 	}
