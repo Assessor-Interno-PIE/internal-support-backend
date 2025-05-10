@@ -1,9 +1,10 @@
-package app.exception.handler;
+package app.exception;
 
+import app.exception.handler.AuthenticationException;
+import app.exception.handler.RegistrationException;
 import com.sun.jdi.InternalException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
-import jdk.jshell.spi.ExecutionControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.TransactionSystemException;
@@ -11,9 +12,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.client.HttpServerErrorException;
-
-import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -60,6 +58,22 @@ public class GlobalExceptionHandler {
             return new ResponseEntity<>("Erro: " + errorMessage, HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>("Erro interno do sistema", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * Trata exceções de autenticação
+     */
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<String> handleAuthenticationException(AuthenticationException ex) {
+        return new ResponseEntity<>("Falha na autenticação: " + ex.getMessage(), HttpStatus.UNAUTHORIZED);
+    }
+
+    /**
+     * Trata exceções de registro de usuário
+     */
+    @ExceptionHandler(RegistrationException.class)
+    public ResponseEntity<String> handleRegistrationException(RegistrationException ex) {
+        return new ResponseEntity<>("Falha no registro: " + ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)

@@ -40,6 +40,9 @@ public class SecurityConfig {
 						// TESTING ENDPOINTS
 						.requestMatchers("/api/auth/userinfo").permitAll() // PARA O SWAGGER
 						.requestMatchers("/api/auth/check").permitAll()
+						.requestMatchers("/oauth2/**").permitAll()
+						.requestMatchers("/login/**").permitAll()
+						.requestMatchers("/api/auth/login").permitAll()
 						// Document endpoints security
 						.requestMatchers("/api/documents/view/**").authenticated() // View documents requires authentication
 						.requestMatchers("/api/documents/download/**").authenticated() // Download requires authentication
