@@ -36,6 +36,7 @@ public class SecurityConfig {
 						// Endpoints públicos
 						.requestMatchers("/").permitAll() // Allows public access to the root URL
 						.requestMatchers("/menu").authenticated() // Requires authentication to access "/menu"
+						.requestMatchers("/api/auth/userinfo").permitAll() // PARA O SWAGGER
 						// Document endpoints security
 						.requestMatchers("/api/documents/view/**").authenticated() // View documents requires authentication
 						.requestMatchers("/api/documents/download/**").authenticated() // Download requires authentication

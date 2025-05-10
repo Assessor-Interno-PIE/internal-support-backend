@@ -14,6 +14,7 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
+                .addSecurityItem(new SecurityRequirement().addList("bearer-key")) // <- PARA O SWAGGER
                 .info(new Info()
                         .title("Internal Support API")
                         .version("1.0")
@@ -26,4 +27,4 @@ public class OpenApiConfig {
                         .scheme("bearer")
                         .bearerFormat("JWT"));
     }
-} 
+}
