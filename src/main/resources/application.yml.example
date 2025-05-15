@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: internal_support
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/internal_support
+    username: YOUR_DB_USERNAME
+    password: YOUR_DB_PASSWORD
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  main:
+    banner-mode: off
+
+  output:
+    ansi:
+      enabled: ALWAYS
+
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/YOUR_REALM
+
+server:
+  port: 8000
+
+upload:
+  path: /your/upload/path
+
+keycloak:
+  auth-server-url: http://localhost:8080
+  realm: YOUR_REALM
+  client-id: YOUR_CLIENT_ID
+  admin:
+    client-id: admin-cli
+    client-secret: YOUR_ADMIN_CLIENT_SECRET
+    realm: master
