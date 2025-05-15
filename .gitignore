@@ -55,6 +55,7 @@ Thumbs.db
 
 # Sensitive files
 *.properties
+*.yml
 
 # Other
 *.swp
