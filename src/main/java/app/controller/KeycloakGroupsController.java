@@ -13,11 +13,11 @@ public class KeycloakGroupsController {
     @Autowired
     private KeycloakGroupsService keycloakGroupsService;
 
-    @GetMapping("/grupos")
-    public ResponseEntity<Object> getGrupos() {
+    @GetMapping("/groups")
+    public ResponseEntity<Object> getGroups() {
         try {
-            Object grupos = keycloakGroupsService.listarGrupos();
-            return ResponseEntity.ok(grupos);
+            Object groups = keycloakGroupsService.listGroups();
+            return ResponseEntity.ok(groups);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Erro ao buscar grupos: " + e.getMessage());
         }

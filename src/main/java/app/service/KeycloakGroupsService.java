@@ -1,5 +1,6 @@
 package app.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -11,16 +12,20 @@ public class KeycloakGroupsService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    // Configurações do Keycloak
-    private final String tokenUrl = "http://localhost:8080/realms/master/protocol/openid-connect/token";
-    private final String clientId = "admin-cli";
-    private final String username = "admin";
-    private final String password = "admin123";
+    // Keycloak config
+    @Value("${keycloak.admin.token-url}")
+    private String tokenUrl;
+    @Value("${keycloak.admin.client-id}")
+    private String clientId;
+    @Value("${keycloak.admin.username}")
+    private String username;
+    @Value("${keycloak.admin.password}")
+    private String password;
+    @Value("${keycloak.admin.groups-url}")
+    private String groupsUrl;
 
-    private final String gruposUrl = "http://localhost:8080/admin/realms/master/groups";
-
-    public Object listarGrupos() {
-        String token = obterToken();
+    public Object listGroups() {
+        String token = getToken();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
@@ -28,7 +33,7 @@ public class KeycloakGroupsService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         ResponseEntity<Object> response = restTemplate.exchange(
-                gruposUrl,
+                groupsUrl,
                 HttpMethod.GET,
                 entity,
                 Object.class
@@ -37,7 +42,7 @@ public class KeycloakGroupsService {
         return response.getBody();
     }
 
-    private String obterToken() {
+    private String getToken() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -57,7 +62,7 @@ public class KeycloakGroupsService {
         return response.getBody().getAccessToken();
     }
 
-    // Classe auxiliar para mapear o token
+    // Token Mapper
     private static class TokenResponse {
         private String access_token;
 
