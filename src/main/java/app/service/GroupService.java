@@ -1,5 +1,6 @@
 package app.service;
 
+import app.auth.service.TokenService;
 import app.dto.GroupDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -14,21 +15,17 @@ import java.util.Objects;
 public class GroupService {
 
     private final RestTemplate restTemplate = new RestTemplate();
+    private final TokenService tokenService;
 
-    // Keycloak config
-    @Value("${keycloak.admin.token-url}")
-    private String tokenUrl;
-    @Value("${keycloak.admin.client-id}")
-    private String clientId;
-    @Value("${keycloak.admin.username}")
-    private String username;
-    @Value("${keycloak.admin.password}")
-    private String password;
     @Value("${keycloak.admin.groups-url}")
     private String groupsUrl;
 
+    public GroupService(TokenService tokenService) {
+        this.tokenService = tokenService;
+    }
+
     public GroupDTO save(GroupDTO groupDTO) {
-        String token = getToken();
+        String token = tokenService.getToken();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
@@ -47,7 +44,7 @@ public class GroupService {
     }
 
     public GroupDTO findById(String id) {
-        String token = getToken();
+        String token = tokenService.getToken();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
@@ -65,7 +62,7 @@ public class GroupService {
     }
 
     public List<GroupDTO> findAll() {
-        String token = getToken();
+        String token = tokenService.getToken();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
@@ -87,7 +84,7 @@ public class GroupService {
     }
 
     public String deleteById(String id) {
-        String token = getToken();
+        String token = tokenService.getToken();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
@@ -105,7 +102,7 @@ public class GroupService {
     }
 
     public GroupDTO updateById(String id, GroupDTO updatedGroup) {
-        String token = getToken();
+        String token = tokenService.getToken();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
@@ -124,7 +121,7 @@ public class GroupService {
     }
 
     public List<GroupDTO> findGroupsByNameContaining(String keyword) {
-        String token = getToken();
+        String token = tokenService.getToken();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
@@ -139,37 +136,5 @@ public class GroupService {
         );
 
         return Arrays.asList(Objects.requireNonNull(response.getBody()));
-    }
-
-    private String getToken() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-        String body = "grant_type=password"
-                + "&client_id=" + clientId
-                + "&username=" + username
-                + "&password=" + password;
-
-        HttpEntity<String> entity = new HttpEntity<>(body, headers);
-
-        ResponseEntity<TokenResponse> response = restTemplate.postForEntity(
-                tokenUrl,
-                entity,
-                TokenResponse.class
-        );
-
-        return response.getBody().getAccessToken();
-    }
-
-    private static class TokenResponse {
-        private String access_token;
-
-        public String getAccessToken() {
-            return access_token;
-        }
-
-        public void setAccess_token(String access_token) {
-            this.access_token = access_token;
-        }
     }
 }
