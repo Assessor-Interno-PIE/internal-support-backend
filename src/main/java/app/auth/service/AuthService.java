@@ -1,8 +1,6 @@
 package app.auth.service;
 
 import app.exception.handler.AuthenticationException;
-import app.exception.handler.RegistrationException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
@@ -35,16 +33,6 @@ public class AuthService {
     @Value("${keycloak.client-id}")
     private String clientId;
 
-    @Value("${keycloak.admin.client-id}")
-    private String adminClientId;
-
-    @Value("${keycloak.admin.client-secret}")
-    private String adminClientSecret;
-
-    @Value("${keycloak.admin.realm}")
-    private String adminRealm;
-
-    @Autowired
     public AuthService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
