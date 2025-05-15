@@ -60,3 +60,5 @@ Thumbs.db
 # Other
 *.swp
 *.swo
+target/
+*.iml
