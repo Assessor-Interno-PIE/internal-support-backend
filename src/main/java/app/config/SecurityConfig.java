@@ -6,6 +6,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
@@ -20,11 +21,12 @@ public class SecurityConfig {
 	 * Configures the security filter chain for handling HTTP requests, OAuth2 login, and logout.
 	 *
 	 * @param http HttpSecurity object to define web-based security at the HTTP level
+	 * @param jwtDecoder the JWT decoder bean
 	 * @return SecurityFilterChain for filtering and securing HTTP requests
 	 * @throws Exception in case of an error during configuration
 	 */
 	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	public SecurityFilterChain filterChain(HttpSecurity http, JwtDecoder jwtDecoder) throws Exception {
 		http
 				.csrf(AbstractHttpConfigurer::disable) // Disable CSRF for API endpoints
 				.cors(AbstractHttpConfigurer::disable) // Disable CORS for API endpoints
@@ -56,7 +58,8 @@ public class SecurityConfig {
 						.requestMatchers("/api/documents/**").authenticated() // Any other document endpoint requires authentication
 						.anyRequest().authenticated() // Requires authentication for any other request
 				)
-				.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+				.oauth2Login(Customizer.withDefaults())
+				.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder)));
 
 		return http.build();
 	}
