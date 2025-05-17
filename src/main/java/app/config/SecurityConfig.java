@@ -1,87 +1,34 @@
 package app.config;
 
-import java.util.Arrays;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig  {
-
-	@Autowired
-	private JwtAuthenticationFilter jwtAuthFilter;
-
-	@Autowired
-	private AuthenticationProvider authenticationProvider;
-	
+public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http    
-		.csrf(AbstractHttpConfigurer::disable)
-		.cors(AbstractHttpConfigurer::disable)
-				//.cors(customizer -> customizer.configurationSource(corsConfigurationSource())) // Ative o CORS
-				.authorizeHttpRequests((requests) -> requests
-				.requestMatchers("/api/login").permitAll()
-				.requestMatchers("/api/token/generate").permitAll()
-				.requestMatchers("/api/register").permitAll()
-				.requestMatchers("/api/documents/save").hasRole("ADMIN")
-				.requestMatchers("/api/documents/").hasRole("ADMIN")
-				.requestMatchers("/api/documents/edit/**").hasRole("ADMIN")
-				.requestMatchers("/api/users/**").hasRole("ADMIN")
-				.requestMatchers("/api/departments/save").hasRole("ADMIN")
-				.requestMatchers("/api/departments/delete-by-id/**").hasRole("ADMIN")
-				.requestMatchers("/api/departments/update-by-id/**").hasRole("ADMIN")
-				.requestMatchers("/api/departments/find-all").permitAll()
-				.requestMatchers("/api/register").permitAll()
-				.requestMatchers("/api/users/save").permitAll()
-						.requestMatchers("/api/users/*/password").permitAll()
-				.anyRequest().authenticated())
-		.authenticationProvider(authenticationProvider)
-		.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-		.sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+		http
+				.csrf(AbstractHttpConfigurer::disable)
+				.cors(AbstractHttpConfigurer::disable)
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers(HttpMethod.GET, "/api/documents/**").hasAnyRole("ADMIN", "USER")
+						.requestMatchers(HttpMethod.POST, "/api/documents/**").hasRole("ADMIN")
+						.requestMatchers(HttpMethod.PUT, "/api/documents/**").hasRole("ADMIN")
+						.requestMatchers(HttpMethod.DELETE, "/api/documents/**").hasRole("ADMIN")
+						.anyRequest().authenticated()
+				)
+				.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
 		return http.build();
 	}
-
-	@Bean
-	public FilterRegistrationBean<CorsFilter> corsFilter() {
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowCredentials(true);
-		//config.addAllowedOrigin("http://localhost:4200");
-		config.setAllowedOriginPatterns(Arrays.asList("*"));
-		config.setAllowedHeaders(Arrays.asList(HttpHeaders.AUTHORIZATION,HttpHeaders.CONTENT_TYPE,HttpHeaders.ACCEPT));
-		config.setAllowedMethods(Arrays.asList(HttpMethod.GET.name(),HttpMethod.POST.name(),HttpMethod.PUT.name(),HttpMethod.DELETE.name(),HttpMethod.PATCH.name()));
-		config.setMaxAge(3600L);
-		source.registerCorsConfiguration("/**", config);
-		FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<CorsFilter>(new CorsFilter(source));
-		bean.setOrder(-102);
-		return bean;
-	}
-
-	// Alter User Password in config area
-	@Bean
-	public PasswordEncoder bcryptPasswordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
-
-
 }
