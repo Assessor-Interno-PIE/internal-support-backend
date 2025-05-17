@@ -7,8 +7,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import app.config.JwtServiceGenerator;
-
 @Service
 public class AuthService {
 	
