@@ -10,6 +10,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,6 +56,18 @@ public class GroupController {
         groupService.deleteById(id);
         return ResponseEntity.ok(new MessageResponse("Grupo deletado com sucesso"));
     }
+
+    @Operation(summary = "Lista grupos paginados")
+    @GetMapping("/find-all/paginated")
+    public ResponseEntity<Page<GroupDto>> findAllPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<GroupDto> paginated = groupService.findAllPaginated(pageable);
+        return ResponseEntity.ok(paginated);
+    }
+
 
     @Operation(summary = "Atualiza um grupo por ID")
     @PutMapping("/groups/{id}")
