@@ -6,11 +6,15 @@ import app.dto.GroupDto;
 import app.exception.handler.KeycloakException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import org.springframework.data.domain.Pageable;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -41,6 +45,24 @@ public class GroupService {
             throw new KeycloakException("Erro ao criar grupo", e);
         }
     }
+
+    public Page<GroupDto> findAllPaginated(Pageable pageable) {
+        List<GroupDto> allGroups = findAll(); // chama o método que faz o request ao Keycloak
+
+        int page = pageable.getPageNumber();
+        int size = pageable.getPageSize();
+
+        int start = page * size;
+        int end = Math.min(start + size, allGroups.size());
+
+        if (start >= allGroups.size()) {
+            return new PageImpl<>(Collections.emptyList(), pageable, allGroups.size());
+        }
+
+        List<GroupDto> paginatedGroups = allGroups.subList(start, end);
+        return new PageImpl<>(paginatedGroups, pageable, allGroups.size());
+    }
+
 
     public GroupDto findById(String id) {
         String token = tokenService.getToken();
