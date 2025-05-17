@@ -1,3 +1,27 @@
-
 server:
-  port:5000
+  port: 5000
+
+spring:
+  application:
+    name: internal_support
+  datasource:
+    url: jdbc:mysql://database.host.net:3306/internal_support
+    username: db_user
+    password: felipe
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+    show-sql: true
+  security:
+    oauth2:
+          resourceserver:
+            jwt:
+              issuer-uri: https://localhost:8080/realms/time05
+
+upload:
+  path: /root/files
+
