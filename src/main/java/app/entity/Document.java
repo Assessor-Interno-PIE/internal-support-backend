@@ -12,6 +12,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "documents")
 public class Document {
 
     @Id
@@ -19,18 +20,21 @@ public class Document {
     private Long id;
 
     @NotBlank(message = "O título não pode estar vazio")
+    @Column(nullable = false)
     private String title;
 
     @Lob
-    @Column(columnDefinition = "LONGBLOB")
+    @Column(columnDefinition = "LONGBLOB", nullable = false)
     private byte[] filePath;
 
-    private String departmentName;
+    @Column(nullable = false)
+    private String groupId;
 
     @NotBlank(message = "Descrição nao pode estar vazia")
+    @Column(nullable = false, length = 1000)
     private String description;
 
+    @Column(nullable = false)
     private String addedBy;
-
 
 }

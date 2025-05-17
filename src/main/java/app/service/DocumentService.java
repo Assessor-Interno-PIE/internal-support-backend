@@ -20,12 +20,12 @@ public class DocumentService {
     private DocumentRepository documentRepository;
 
     // Salvar novo documento
-    public Document save(MultipartFile pdfFile, String departmentName, String title, String description, String addedBy) throws IOException {
+    public Document save(MultipartFile file, String groupId, String title, String description, String addedBy) throws IOException {
         Document document = new Document();
-        document.setDepartmentName(departmentName);
+        document.setGroupId(groupId);
         document.setTitle(title);
         document.setDescription(description);
-        document.setFilePath(pdfFile.getBytes()); // Store raw bytes
+        document.setFilePath(file.getBytes());
         document.setAddedBy(addedBy);
 
         return documentRepository.save(document);
@@ -68,18 +68,13 @@ public class DocumentService {
         return documents;
     }
 
-    // Buscar por departamento
-    public List<Document> findDocumentsByDepartment(String departmentName) {
-        return documentRepository.findByDepartmentName(departmentName);
-    }
-
-    // Buscar por título (palavra-chave)
-    public List<Document> findDocumentsByTitleContaining(String keyword) {
-        return documentRepository.findByTitleContainingIgnoreCase(keyword);
+    // Buscar por grupo
+    public List<Document> findByGroupId(String groupId) {
+        return documentRepository.findByGroupId(groupId);
     }
 
     // Deletar por ID
-    public void deleteDocumentById(Long id) {
+    public void deleteById(Long id) {
         if (!documentRepository.existsById(id)) {
             throw new IllegalArgumentException("Documento com o ID fornecido não foi encontrado.");
         }
@@ -87,16 +82,16 @@ public class DocumentService {
     }
 
     // Atualizar documento existente
-    public Document updateDocument(Long id, MultipartFile file, String title, String description, String departmentName) throws IOException {
+    public Document updateById(Long id, MultipartFile file, String title, String description, String groupId) throws IOException {
         Document document = documentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Documento com o ID fornecido não foi encontrado."));
 
         document.setTitle(title);
         document.setDescription(description);
-        document.setDepartmentName(departmentName);
+        document.setGroupId(groupId);
 
         if (file != null && !file.isEmpty()) {
-            document.setFilePath(file.getBytes()); // Store raw bytes
+            document.setFilePath(file.getBytes());
         }
 
         return documentRepository.save(document);

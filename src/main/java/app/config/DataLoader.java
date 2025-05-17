@@ -20,14 +20,14 @@ public class DataLoader implements CommandLineRunner {
             Document doc1 = new Document();
             doc1.setTitle("Manual do Usuário");
             doc1.setDescription("Manual básico de utilização do sistema");
-            doc1.setDepartmentName("TI");
+            doc1.setGroupId("ti-group-id"); // ID do grupo TI no Keycloak
             doc1.setAddedBy("admin");
             doc1.setFilePath(new byte[0]); // Arquivo vazio inicial
 
             Document doc2 = new Document();
             doc2.setTitle("Política de Segurança");
             doc2.setDescription("Políticas de segurança da empresa");
-            doc2.setDepartmentName("RH");
+            doc2.setGroupId("rh-group-id"); // ID do grupo RH no Keycloak
             doc2.setAddedBy("admin");
             doc2.setFilePath(new byte[0]); // Arquivo vazio inicial
 
