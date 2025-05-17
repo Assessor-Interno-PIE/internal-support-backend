@@ -4,13 +4,13 @@ import app.exception.handler.AuthenticationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,10 +83,15 @@ public class AuthService {
             userInfo.put("name", jwt.getClaim("name"));
             userInfo.put("email", jwt.getClaim("email"));
 
-            // Roles do usuário
-            List<String> roles = authentication.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .collect(Collectors.toList());
+            // Roles do client
+            List<String> roles = new ArrayList<>();
+            Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
+            if (resourceAccess != null && resourceAccess.containsKey(clientId)) {
+                Map<String, Object> clientAccess = (Map<String, Object>) resourceAccess.get(clientId);
+                if (clientAccess != null && clientAccess.containsKey("roles")) {
+                    roles.addAll((List<String>) clientAccess.get("roles"));
+                }
+            }
             userInfo.put("roles", roles);
 
             // Departamentos do usuário
