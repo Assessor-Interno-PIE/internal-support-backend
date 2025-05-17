@@ -1,8 +1,6 @@
 package app.service;
 
-import app.entity.Department;
 import app.entity.Document;
-import app.repository.DepartmentRepository;
 import app.repository.DocumentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;

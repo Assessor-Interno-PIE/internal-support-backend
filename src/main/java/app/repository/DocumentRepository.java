@@ -1,6 +1,5 @@
 package app.repository;
 
-import app.entity.Department;
 import app.entity.Document;
 import org.springframework.data.jpa.repository.JpaRepository;
 

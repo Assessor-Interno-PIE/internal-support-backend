@@ -1,11 +1,7 @@
 package app.config;
 
-import app.entity.Department;
 import app.entity.Document;
-import app.entity.User;
-import app.repository.DepartmentRepository;
 import app.repository.DocumentRepository;
-import app.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;

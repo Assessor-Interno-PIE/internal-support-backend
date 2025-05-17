@@ -1,6 +1,5 @@
 package app.auth;
 
-import app.entity.Department;
 import lombok.Getter;
 import lombok.Setter;
 

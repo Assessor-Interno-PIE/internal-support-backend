@@ -1,6 +1,5 @@
 package app.controller;
 
-import app.entity.Department;
 import app.entity.Document;
 import app.service.DocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
