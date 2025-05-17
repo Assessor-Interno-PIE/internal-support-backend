@@ -97,9 +97,9 @@ public class GroupController {
             @ApiResponse(responseCode = "500", description = "Erro interno ao atualizar grupo")
     })
     @PutMapping("/groups/{id}")
-    public ResponseEntity<?> updateById(@PathVariable String id, @Valid @RequestBody GroupDto updatedGroup) {
+    public ResponseEntity<?> updateById(@PathVariable String id, @Valid @RequestBody CreateGroupDto updatedGroup) {
         try {
-            GroupDto group = groupService.updateById(id, updatedGroup);
+            CreateGroupDto group = groupService.updateById(id, updatedGroup);
             return ResponseEntity.ok(group);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Erro ao atualizar grupo: " + e.getMessage());

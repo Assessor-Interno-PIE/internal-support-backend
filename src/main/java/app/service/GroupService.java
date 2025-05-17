@@ -102,20 +102,20 @@ public class GroupService {
         return "Group deleted successfully.";
     }
 
-    public GroupDto updateById(String id, GroupDto updatedGroup) {
+    public CreateGroupDto updateById(String id, CreateGroupDto updatedGroup) {
         String token = tokenService.getToken();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<GroupDto> entity = new HttpEntity<>(updatedGroup, headers);
+        HttpEntity<CreateGroupDto> entity = new HttpEntity<>(updatedGroup, headers);
 
-        ResponseEntity<GroupDto> response = restTemplate.exchange(
+        ResponseEntity<CreateGroupDto> response = restTemplate.exchange(
                 groupsUrl + "/" + id,
                 HttpMethod.PUT,
                 entity,
-                GroupDto.class
+                CreateGroupDto.class
         );
 
         return Objects.requireNonNull(response.getBody(), "Group not found with id: " + id);
