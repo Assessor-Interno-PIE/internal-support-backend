@@ -38,14 +38,18 @@ public class SecurityConfig {
 						.requestMatchers("/swagger-ui.html").permitAll()
 						// Endpoints públicos
 						.requestMatchers("/").permitAll() // Allows public access to the root URL
-						.requestMatchers("/menu").authenticated() // Requires authentication to access "/menu"
+
 						// TESTING ENDPOINTS
 						.requestMatchers("/api/auth/userinfo").permitAll() // PARA O SWAGGER
 						.requestMatchers("/api/auth/check").permitAll()
 						.requestMatchers("/oauth2/**").permitAll()
 						.requestMatchers("/login/**").permitAll()
 						.requestMatchers("/api/auth/login").permitAll()
-						// Document endpoints security
+
+						// Keycloak Groups
+						.requestMatchers("/api/keycloak/groups/**").hasRole("ADMIN")
+
+						// Documents
 						.requestMatchers("/api/documents/view/**").authenticated() // View documents requires authentication
 						.requestMatchers("/api/documents/download/**").authenticated() // Download requires authentication
 						.requestMatchers("/api/documents/find-by-id/**").authenticated() // Find by ID requires authentication
