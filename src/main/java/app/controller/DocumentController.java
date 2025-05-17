@@ -2,134 +2,152 @@ package app.controller;
 
 import app.entity.Document;
 import app.service.DocumentService;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
 
-@CrossOrigin("*")
 @RestController
-@RequestMapping("/api/documents")
+@RequestMapping("/documents")
+@CrossOrigin(origins = "*")
 public class DocumentController {
 
     @Autowired
     private DocumentService documentService;
 
-    @PostMapping("/save")
-    public ResponseEntity<String> saveDocument(
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> uploadDocument(
             @RequestParam("file") MultipartFile file,
-            @RequestParam("departmentId") Long departmentId,
-            @RequestParam("title") String title,
-            @RequestParam("description") String description
+            @RequestParam("departmentName") @NotBlank String department,
+            @RequestParam("title") @NotBlank String title,
+            @RequestParam("description") @NotBlank String description,
+            @RequestParam("addedBy") @NotBlank String addedBy
     ) {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("O arquivo enviado está vazio.");
+        }
+
         try {
-            Document document = documentService.save(file, departmentId, title, description);
-            return ResponseEntity.ok("Arquivo salvo com sucesso! ID do documento: " + document.getId());
+            Document saved = documentService.save(file, department, title, description, addedBy);
+            return ResponseEntity.ok("Documento armazenado com sucesso. ID: " + saved.getId());
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao salvar o arquivo: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao salvar documento: " + e.getMessage());
         }
     }
 
-    @GetMapping("/view/{documentId}")
-    public ResponseEntity<Resource> viewDocument(@PathVariable Long documentId) {
+    @GetMapping("/view/{id}")
+    public ResponseEntity<Resource> view(@PathVariable Long id) {
         try {
-            Resource resource = documentService.downloadFile(documentId);
-
-            // Configurar o cabeçalho para exibir o PDF no navegador
-            String contentDisposition = "inline; filename=\"" + resource.getFilename() + "\"";
-
+            Resource file = documentService.downloadFile(id);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
-                    .contentType(MediaType.APPLICATION_PDF) // Definir o tipo de conteúdo como PDF
-                    .body(resource);
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"doc-" + id + "\"")
+                    .body(file);
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.internalServerError().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 
-
-    @GetMapping("/download/{documentId}")
-    public ResponseEntity<Resource> downloadDocument(@PathVariable Long documentId) {
+    @GetMapping("/download/{id}")
+    public ResponseEntity<Resource> download(@PathVariable Long id) {
         try {
-            Resource resource = documentService.downloadFile(documentId);
-
-            String contentDisposition = "attachment; filename=\"" + resource.getFilename() + "\"";
-
+            Resource file = documentService.downloadFile(id);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
-                    .body(resource);
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"doc-" + id + "\"")
+                    .body(file);
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.internalServerError().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 
-    @GetMapping("/find-by-id/{id}")
-    public ResponseEntity<Document> findById(@PathVariable Long id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<Document> getById(@PathVariable Long id) {
         try {
             Document document = documentService.findById(id);
-            return new ResponseEntity<>(document, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            return ResponseEntity.ok(document);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 
-    @GetMapping("/find-all")
-    public ResponseEntity<List<Document>> findAll() {
-        List<Document> documents = documentService.findAll();
-        return new ResponseEntity<>(documents, HttpStatus.OK);
+    @GetMapping
+    public ResponseEntity<List<Document>> listAll() {
+        try {
+            return ResponseEntity.ok(documentService.findAll());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
-    @GetMapping("/find-all/paginated")
-    public ResponseEntity<Page<Document>> findAllPaginated(
+    @GetMapping("/page")
+    public ResponseEntity<Page<Document>> paginatedList(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
-        Page<Document> documents = documentService.findAllPaginated(PageRequest.of(page, size));
-        return new ResponseEntity<>(documents, HttpStatus.OK);
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        try {
+            Page<Document> docs = documentService.findAllPaginated(PageRequest.of(page, size));
+            return ResponseEntity.ok(docs);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
-    @GetMapping("/by-department/{id}")
-    public ResponseEntity<List<Document>> getDocumentsByDepartment(@PathVariable Long id) {
-        List<Document> documents = documentService.findDocumentsByDepartment(id);
-        return new ResponseEntity<>(documents, HttpStatus.OK);
+    @GetMapping("/department/{name}")
+    public ResponseEntity<List<Document>> listByDepartment(@PathVariable String name) {
+        List<Document> docs = documentService.findDocumentsByDepartment(name);
+        if (docs.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(docs);
     }
 
-    @GetMapping("/search/title-contains")
-    public ResponseEntity<List<Document>> getDocumentsByTitleContaining(@RequestParam String keyword) {
-        List<Document> documents = documentService.findDocumentsByTitleContaining(keyword);
-        return ResponseEntity.ok(documents);
+    @GetMapping("/search")
+    public ResponseEntity<List<Document>> searchByTitle(@RequestParam("keyword") String keyword) {
+        List<Document> results = documentService.findDocumentsByTitleContaining(keyword);
+        if (results.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(results);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteDocument(@PathVariable Long id) {
+    public ResponseEntity<String> delete(@PathVariable Long id) {
         try {
             documentService.deleteDocumentById(id);
-            return new ResponseEntity<>("Documento deletado com sucesso!", HttpStatus.OK);
+            return ResponseEntity.ok("Documento excluído.");
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Documento não encontrado.");
         }
     }
 
-    @PutMapping(value = "edit/{id}", consumes = "multipart/form-data")
-    public ResponseEntity<String> updateDocument(
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> update(
             @PathVariable Long id,
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("title") String title,
-            @RequestParam("description") String description,
-            @RequestParam("departmentId") Long departmentId) {
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam("title") @NotBlank String title,
+            @RequestParam("description") @NotBlank String description,
+            @RequestParam("departmentName") @NotBlank String department
+    ) {
         try {
-            Document updatedDocument = documentService.updateDocument(id, file, title, description, departmentId);
-            return new ResponseEntity<>("Documento atualizado com sucesso! ID do documento: " + updatedDocument.getId(), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("Erro ao atualizar o documento: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            Document updated = documentService.updateDocument(id, file, title, description, department);
+            return ResponseEntity.ok("Documento atualizado. ID: " + updated.getId());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Documento não encontrado.");
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().body("Falha ao atualizar documento.");
         }
     }
 }
