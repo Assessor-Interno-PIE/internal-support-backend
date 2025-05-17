@@ -29,11 +29,6 @@ public class GroupController {
     }
 
     @Operation(summary = "Cria um novo grupo")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Grupo criado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos"),
-            @ApiResponse(responseCode = "500", description = "Erro interno")
-    })
     @PostMapping("/groups")
     public ResponseEntity<MessageResponse> save(@Valid @RequestBody CreateGroupDto dto) {
         groupService.save(dto);
