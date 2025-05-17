@@ -1,6 +1,7 @@
 package app.controller;
 
-import app.dto.GroupDTO;
+import app.dto.CreateGroupDto;
+import app.dto.GroupDto;
 import app.service.GroupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -31,9 +32,9 @@ public class GroupController {
             @ApiResponse(responseCode = "500", description = "Erro interno ao criar grupo")
     })
     @PostMapping("/groups")
-    public ResponseEntity<String> save(@Valid @RequestBody GroupDTO groupDTO) {
+    public ResponseEntity<String> save(@Valid @RequestBody CreateGroupDto createGroupDto) {
         try {
-            groupService.save(groupDTO);
+            groupService.save(createGroupDto);
             return ResponseEntity.ok("Grupo criado com sucesso");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Erro ao criar grupo: " + e.getMessage());
@@ -49,7 +50,7 @@ public class GroupController {
     @GetMapping("/groups/{id}")
     public ResponseEntity<?> findById(@PathVariable String id) {
         try {
-            GroupDTO group = groupService.findById(id);
+            GroupDto group = groupService.findById(id);
             return ResponseEntity.ok(group);
         } catch (Exception e) {
             return ResponseEntity.status(404).body("Grupo não encontrado: " + e.getMessage());
@@ -65,7 +66,7 @@ public class GroupController {
     @GetMapping("/groups")
     public ResponseEntity<?> findAll() {
         try {
-            List<GroupDTO> groups = groupService.findAll();
+            List<GroupDto> groups = groupService.findAll();
             return ResponseEntity.ok(groups);
         } catch (Exception e) {
             return ResponseEntity.status(404).body("Nenhum grupo encontrado: " + e.getMessage());
@@ -96,27 +97,12 @@ public class GroupController {
             @ApiResponse(responseCode = "500", description = "Erro interno ao atualizar grupo")
     })
     @PutMapping("/groups/{id}")
-    public ResponseEntity<?> updateById(@PathVariable String id, @Valid @RequestBody GroupDTO updatedGroup) {
+    public ResponseEntity<?> updateById(@PathVariable String id, @Valid @RequestBody GroupDto updatedGroup) {
         try {
-            GroupDTO group = groupService.updateById(id, updatedGroup);
+            GroupDto group = groupService.updateById(id, updatedGroup);
             return ResponseEntity.ok(group);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Erro ao atualizar grupo: " + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "Busca grupos por nome", description = "Retorna uma lista de grupos que contêm a palavra-chave no nome")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Grupos encontrados"),
-            @ApiResponse(responseCode = "500", description = "Erro interno ao buscar grupos")
-    })
-    @GetMapping("/groups/search")
-    public ResponseEntity<?> findGroupsByNameContaining(@RequestParam String keyword) {
-        try {
-            List<GroupDTO> groups = groupService.findGroupsByNameContaining(keyword);
-            return ResponseEntity.ok(groups);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Erro ao buscar grupos por nome: " + e.getMessage());
         }
     }
 }

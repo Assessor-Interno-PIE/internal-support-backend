@@ -1,7 +1,8 @@
 package app.service;
 
 import app.auth.service.TokenService;
-import app.dto.GroupDTO;
+import app.dto.CreateGroupDto;
+import app.dto.GroupDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -24,26 +25,26 @@ public class GroupService {
         this.tokenService = tokenService;
     }
 
-    public GroupDTO save(GroupDTO groupDTO) {
+    public CreateGroupDto save(CreateGroupDto createGroupDto) {
         String token = tokenService.getToken();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<GroupDTO> entity = new HttpEntity<>(groupDTO, headers);
+        HttpEntity<CreateGroupDto> entity = new HttpEntity<>(createGroupDto, headers);
 
-        ResponseEntity<GroupDTO> response = restTemplate.exchange(
+        ResponseEntity<CreateGroupDto> response = restTemplate.exchange(
                 groupsUrl,
                 HttpMethod.POST,
                 entity,
-                GroupDTO.class
+                CreateGroupDto.class
         );
 
         return response.getBody();
     }
 
-    public GroupDTO findById(String id) {
+    public GroupDto findById(String id) {
         String token = tokenService.getToken();
 
         HttpHeaders headers = new HttpHeaders();
@@ -51,17 +52,17 @@ public class GroupService {
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<GroupDTO> response = restTemplate.exchange(
+        ResponseEntity<GroupDto> response = restTemplate.exchange(
                 groupsUrl + "/" + id,
                 HttpMethod.GET,
                 entity,
-                GroupDTO.class
+                GroupDto.class
         );
 
         return Objects.requireNonNull(response.getBody(), "Group not found with id: " + id);
     }
 
-    public List<GroupDTO> findAll() {
+    public List<GroupDto> findAll() {
         String token = tokenService.getToken();
 
         HttpHeaders headers = new HttpHeaders();
@@ -69,14 +70,14 @@ public class GroupService {
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<GroupDTO[]> response = restTemplate.exchange(
+        ResponseEntity<GroupDto[]> response = restTemplate.exchange(
                 groupsUrl,
                 HttpMethod.GET,
                 entity,
-                GroupDTO[].class
+                GroupDto[].class
         );
 
-        List<GroupDTO> groups = Arrays.asList(Objects.requireNonNull(response.getBody()));
+        List<GroupDto> groups = Arrays.asList(Objects.requireNonNull(response.getBody()));
         if (groups.isEmpty()) {
             throw new RuntimeException("No groups found!");
         }
@@ -101,40 +102,22 @@ public class GroupService {
         return "Group deleted successfully.";
     }
 
-    public GroupDTO updateById(String id, GroupDTO updatedGroup) {
+    public GroupDto updateById(String id, GroupDto updatedGroup) {
         String token = tokenService.getToken();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<GroupDTO> entity = new HttpEntity<>(updatedGroup, headers);
+        HttpEntity<GroupDto> entity = new HttpEntity<>(updatedGroup, headers);
 
-        ResponseEntity<GroupDTO> response = restTemplate.exchange(
+        ResponseEntity<GroupDto> response = restTemplate.exchange(
                 groupsUrl + "/" + id,
                 HttpMethod.PUT,
                 entity,
-                GroupDTO.class
+                GroupDto.class
         );
 
         return Objects.requireNonNull(response.getBody(), "Group not found with id: " + id);
-    }
-
-    public List<GroupDTO> findGroupsByNameContaining(String keyword) {
-        String token = tokenService.getToken();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
-
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-
-        ResponseEntity<GroupDTO[]> response = restTemplate.exchange(
-                groupsUrl + "?search=" + keyword,
-                HttpMethod.GET,
-                entity,
-                GroupDTO[].class
-        );
-
-        return Arrays.asList(Objects.requireNonNull(response.getBody()));
     }
 }
