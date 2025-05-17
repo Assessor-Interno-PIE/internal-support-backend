@@ -19,93 +19,99 @@ public class DocumentService {
     @Autowired
     private DocumentRepository documentRepository;
 
-    @Autowired
-    private DepartmentRepository departmentRepository;
-
-    // Salvar novo documento
-    public Document save(MultipartFile pdfFile, Long departmentId, String title, String description) throws IOException {
-        Department department = departmentRepository.findById(departmentId)
-                .orElseThrow(() -> new IllegalArgumentException("Departamento não encontrado"));
-
+    /**
+     * Armazena um novo documento no sistema
+     */
+    public Document save(MultipartFile pdfFile, String departmentName, String title, String description, String addedBy) throws IOException {
         Document document = new Document();
-        document.setDepartment(department);
         document.setTitle(title);
         document.setDescription(description);
+        document.setDepartmentName(departmentName);
+        document.setAddedBy(addedBy);
         document.setFilePath(pdfFile.getBytes());
 
         return documentRepository.save(document);
     }
 
-    // Fazer download do PDF como Resource
+    /**
+     * Recupera o arquivo PDF de um documento específico
+     */
     public Resource downloadFile(Long documentId) throws IOException {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new IllegalArgumentException("Documento não encontrado"));
 
-        byte[] fileBytes = document.getFilePath();
-        if (fileBytes == null || fileBytes.length == 0) {
+        byte[] bytes = document.getFilePath();
+        if (bytes == null || bytes.length == 0) {
             throw new IOException("Arquivo não disponível no documento");
         }
 
-        return new ByteArrayResource(fileBytes);
+        return new ByteArrayResource(bytes);
     }
 
-    // Buscar por ID
+    /**
+     * Retorna um documento específico pelo ID
+     */
     public Document findById(Long id) {
         return documentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Documento não encontrado com id: " + id));
+                .orElseThrow(() -> new RuntimeException("Documento não encontrado com ID: " + id));
     }
 
-    // Listar todos os documentos
+    /**
+     * Retorna todos os documentos cadastrados
+     */
     public List<Document> findAll() {
         List<Document> documents = documentRepository.findAll();
         if (documents.isEmpty()) {
-            throw new RuntimeException("Não há documentos registrados!");
+            throw new RuntimeException("Nenhum documento foi encontrado.");
         }
         return documents;
     }
 
-    // Paginação
+    /**
+     * Retorna todos os documentos com paginação
+     */
     public Page<Document> findAllPaginated(Pageable pageable) {
         Page<Document> documents = documentRepository.findAll(pageable);
         if (documents.isEmpty()) {
-            throw new RuntimeException("Não há documentos registrados!");
+            throw new RuntimeException("Nenhum documento foi encontrado.");
         }
         return documents;
     }
 
-    // Buscar por departamento
-    public List<Document> findDocumentsByDepartment(Long departmentId) {
-        Department department = departmentRepository.findById(departmentId)
-                .orElseThrow(() -> new IllegalArgumentException("Departamento não encontrado"));
-        return documentRepository.findByDepartment(department);
+    /**
+     * Busca documentos por nome do departamento
+     */
+    public List<Document> findDocumentsByDepartment(String departmentName) {
+        return documentRepository.findByDepartment(departmentName);
     }
 
-    // Buscar por título (palavra-chave)
+    /**
+     * Busca documentos por palavras-chave no título
+     */
     public List<Document> findDocumentsByTitleContaining(String keyword) {
         return documentRepository.findByTitleContainingIgnoreCase(keyword);
     }
 
-    // Deletar por ID
+    /**
+     * Remove um documento pelo ID
+     */
     public void deleteDocumentById(Long id) {
         if (!documentRepository.existsById(id)) {
-            throw new IllegalArgumentException("Documento com o ID fornecido não foi encontrado.");
+            throw new IllegalArgumentException("Documento com o ID informado não existe.");
         }
         documentRepository.deleteById(id);
     }
 
-    // Atualizar documento existente
-    public Document updateDocument(Long id, MultipartFile file, String title, String description, Long departmentId) throws IOException {
+    /**
+     * Atualiza os dados de um documento existente
+     */
+    public Document updateDocument(Long id, MultipartFile file, String title, String description, String departmentName) throws IOException {
         Document document = documentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Documento com o ID fornecido não foi encontrado."));
+                .orElseThrow(() -> new IllegalArgumentException("Documento não encontrado com ID: " + id));
 
         document.setTitle(title);
         document.setDescription(description);
-
-        if (departmentId != null) {
-            Department department = departmentRepository.findById(departmentId)
-                    .orElseThrow(() -> new IllegalArgumentException("Departamento não encontrado"));
-            document.setDepartment(department);
-        }
+        document.setDepartmentName(departmentName);
 
         if (file != null && !file.isEmpty()) {
             document.setFilePath(file.getBytes());

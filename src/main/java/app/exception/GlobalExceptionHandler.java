@@ -1,4 +1,4 @@
-package app.exception.handler;
+package app.exception;
 
 import com.sun.jdi.InternalException;
 import jakarta.persistence.EntityNotFoundException;
@@ -66,4 +66,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleGeneralException(Exception ex) {
         return new ResponseEntity<>("Erro interno: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(app.exception.handler.AuthenticationException.class)
+    public ResponseEntity<String> handleAuthenticationException(app.exception.handler.AuthenticationException ex) {
+        return new ResponseEntity<>("Falha na autenticação: " + ex.getMessage(), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(app.exception.handler.KeycloakException.class)
+    public ResponseEntity<String> handleKeycloakException(app.exception.handler.KeycloakException ex) {
+        return new ResponseEntity<>("Erro ao comunicar com Keycloak: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(app.exception.handler.RegistrationException.class)
+    public ResponseEntity<String> handleRegistrationException(app.exception.handler.RegistrationException ex) {
+        return new ResponseEntity<>("Erro ao registrar usuário: " + ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
 }

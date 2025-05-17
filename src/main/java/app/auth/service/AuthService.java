@@ -1,6 +1,5 @@
 package app.auth.service;
 
-import app.exception.handler.AuthenticationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
