@@ -3,10 +3,7 @@ package app.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Getter
@@ -19,17 +16,23 @@ public class Document {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "O título não pode estar vazio")
+    @NotBlank(message = "Título obrigatório")
     private String title;
 
-    @NotNull(message = "O departamento não pode estar vazio")
-    @ManyToOne
-    private Department department;
-
-    @NotBlank(message = "Descrição nao pode estar vazia")
+    @NotBlank(message = "Descrição não pode ser vazia")
     private String description;
 
+    /**
+     * Arquivo binário armazenado no banco
+     */
     @Lob
     @Column(name = "filePath", columnDefinition = "LONGBLOB")
     private byte[] filePath;
+
+    private String departmentName;
+
+    /**
+     * Nome de usuário que adicionou o documento (para fins de rastreamento)
+     */
+    private String addedBy;
 }
