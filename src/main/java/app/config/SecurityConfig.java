@@ -6,8 +6,17 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * SecurityConfig class configures security settings for the application,
@@ -16,6 +25,25 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+	@Bean
+	public JwtAuthenticationConverter jwtAuthenticationConverter() {
+		JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+		converter.setJwtGrantedAuthoritiesConverter(jwt -> {
+			Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
+			if (resourceAccess != null && resourceAccess.containsKey("internal-support")) {
+				Map<String, Object> clientAccess = (Map<String, Object>) resourceAccess.get("internal-support");
+				if (clientAccess != null && clientAccess.containsKey("roles")) {
+					List<String> roles = (List<String>) clientAccess.get("roles");
+					return roles.stream()
+							.map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+							.collect(Collectors.toList());
+				}
+			}
+			return List.of();
+		});
+		return converter;
+	}
 
 	/**
 	 * Configures the security filter chain for handling HTTP requests, OAuth2 login, and logout.
@@ -47,7 +75,7 @@ public class SecurityConfig {
 						.requestMatchers("/api/auth/login").permitAll()
 
 						// Keycloak Groups
-						.requestMatchers("/api/keycloak/groups/**").hasRole("ADMIN")
+						.requestMatchers("/api/keycloak/groups/**").hasAuthority("ROLE_ADMIN")
 
 						// Documents
 						.requestMatchers("/api/documents/view/**").authenticated() // View documents requires authentication
@@ -63,7 +91,12 @@ public class SecurityConfig {
 						.anyRequest().authenticated() // Requires authentication for any other request
 				)
 				.oauth2Login(Customizer.withDefaults())
-				.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder)));
+				.oauth2ResourceServer(oauth2 -> oauth2
+						.jwt(jwt -> jwt
+								.decoder(jwtDecoder)
+								.jwtAuthenticationConverter(jwtAuthenticationConverter())
+						)
+				);
 
 		return http.build();
 	}

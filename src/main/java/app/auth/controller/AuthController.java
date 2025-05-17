@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Controller para operações de autenticação
@@ -56,5 +57,17 @@ public class AuthController {
         Map<String, Boolean> response = new HashMap<>();
         response.put("isAuthenticated", authService.isAuthenticated(authentication));
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/debug/authorities")
+    public Map<String, Object> getAuthorities(Authentication authentication) {
+        Map<String, Object> result = new HashMap<>();
+        if (authentication != null) {
+            result.put("authorities", authentication.getAuthorities().stream()
+                    .map(Object::toString)
+                    .collect(Collectors.toList()));
+            result.put("principal", authentication.getPrincipal());
+        }
+        return result;
     }
 }
