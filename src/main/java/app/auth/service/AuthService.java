@@ -10,6 +10,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import app.exception.handler.AuthenticationException;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -70,7 +72,7 @@ public class AuthService {
 	 * @param authentication autenticação ativa no contexto atual
 	 * @return mapa com dados como id, nome, email, permissões e departamentos
 	 */
-	public Map<String, Object> getUserInfo(Authentication authentication) {
+	public Map<String, Object> extractUserDetails(Authentication authentication) {
 		Map<String, Object> userInfo = new HashMap<>();
 
 		if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
