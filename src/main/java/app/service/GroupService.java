@@ -3,6 +3,7 @@ package app.service;
 import app.auth.service.TokenService;
 import app.dto.CreateGroupDto;
 import app.dto.GroupDto;
+import app.exception.handler.KeycloakException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -25,84 +26,57 @@ public class GroupService {
         this.tokenService = tokenService;
     }
 
-    public CreateGroupDto save(CreateGroupDto createGroupDto) {
-        String token = tokenService.getToken();
+    public CreateGroupDto save(CreateGroupDto dto) {
+        try {
+            HttpHeaders headers = getHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<CreateGroupDto> entity = new HttpEntity<>(dto, headers);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<CreateGroupDto> entity = new HttpEntity<>(createGroupDto, headers);
-
-        ResponseEntity<CreateGroupDto> response = restTemplate.exchange(
-                groupsUrl,
-                HttpMethod.POST,
-                entity,
-                CreateGroupDto.class
-        );
-
-        return response.getBody();
+            ResponseEntity<CreateGroupDto> response = restTemplate.exchange(
+                    groupsUrl, HttpMethod.POST, entity, CreateGroupDto.class
+            );
+            return response.getBody();
+        } catch (Exception e) {
+            throw new KeycloakException("Erro ao criar grupo", e);
+        }
     }
 
     public GroupDto findById(String id) {
-        String token = tokenService.getToken();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
-
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-
-        ResponseEntity<GroupDto> response = restTemplate.exchange(
-                groupsUrl + "/" + id,
-                HttpMethod.GET,
-                entity,
-                GroupDto.class
-        );
-
-        return Objects.requireNonNull(response.getBody(), "Group not found with id: " + id);
+        try {
+            HttpEntity<String> entity = new HttpEntity<>(getHeaders());
+            ResponseEntity<GroupDto> response = restTemplate.exchange(
+                    groupsUrl + "/" + id, HttpMethod.GET, entity, GroupDto.class
+            );
+            return Objects.requireNonNull(response.getBody(), "Grupo não encontrado com id: " + id);
+        } catch (Exception e) {
+            throw new KeycloakException("Erro ao buscar grupo com id: " + id, e);
+        }
     }
 
     public List<GroupDto> findAll() {
-        String token = tokenService.getToken();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
-
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-
-        ResponseEntity<GroupDto[]> response = restTemplate.exchange(
-                groupsUrl,
-                HttpMethod.GET,
-                entity,
-                GroupDto[].class
-        );
-
-        List<GroupDto> groups = Arrays.asList(Objects.requireNonNull(response.getBody()));
-        if (groups.isEmpty()) {
-            throw new RuntimeException("No groups found!");
+        try {
+            HttpEntity<String> entity = new HttpEntity<>(getHeaders());
+            ResponseEntity<GroupDto[]> response = restTemplate.exchange(
+                    groupsUrl, HttpMethod.GET, entity, GroupDto[].class
+            );
+            List<GroupDto> groups = Arrays.asList(Objects.requireNonNull(response.getBody()));
+            if (groups.isEmpty()) throw new KeycloakException("Nenhum grupo encontrado");
+            return groups;
+        } catch (Exception e) {
+            throw new KeycloakException("Erro ao listar grupos", e);
         }
-        return groups;
     }
 
-    public String deleteById(String id) {
-        String token = tokenService.getToken();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
-
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-
-        restTemplate.exchange(
-                groupsUrl + "/" + id,
-                HttpMethod.DELETE,
-                entity,
-                Void.class
-        );
-
-        return "Group deleted successfully.";
+    public void deleteById(String id) {
+        try {
+            HttpEntity<String> entity = new HttpEntity<>(getHeaders());
+            restTemplate.exchange(groupsUrl + "/" + id, HttpMethod.DELETE, entity, Void.class);
+        } catch (Exception e) {
+            throw new KeycloakException("Erro ao deletar grupo com id: " + id, e);
+        }
     }
 
-    public CreateGroupDto updateById(String id, CreateGroupDto updatedGroup) {
+    public void updateById(String id, CreateGroupDto updatedGroup) {
         String token = tokenService.getToken();
 
         HttpHeaders headers = new HttpHeaders();
@@ -111,13 +85,19 @@ public class GroupService {
 
         HttpEntity<CreateGroupDto> entity = new HttpEntity<>(updatedGroup, headers);
 
-        ResponseEntity<CreateGroupDto> response = restTemplate.exchange(
+        restTemplate.exchange(
                 groupsUrl + "/" + id,
                 HttpMethod.PUT,
                 entity,
-                CreateGroupDto.class
+                Void.class // Não espera corpo de resposta
         );
+    }
 
-        return Objects.requireNonNull(response.getBody(), "Group not found with id: " + id);
+
+    private HttpHeaders getHeaders() {
+        String token = tokenService.getToken();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        return headers;
     }
 }

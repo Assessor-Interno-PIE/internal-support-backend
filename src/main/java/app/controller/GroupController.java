@@ -3,13 +3,13 @@ package app.controller;
 import app.dto.CreateGroupDto;
 import app.dto.GroupDto;
 import app.service.GroupService;
+import app.dto.MessageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,87 +22,47 @@ import java.util.List;
 @SecurityRequirement(name = "OAuth2")
 public class GroupController {
 
-    @Autowired
-    private GroupService groupService;
+    private final GroupService groupService;
 
-    @Operation(summary = "Cria um novo grupo", description = "Cria um novo grupo no Keycloak com os dados fornecidos")
-    @ApiResponses(value = {
+    public GroupController(GroupService groupService) {
+        this.groupService = groupService;
+    }
+
+    @Operation(summary = "Cria um novo grupo")
+    @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Grupo criado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos"),
-            @ApiResponse(responseCode = "500", description = "Erro interno ao criar grupo")
+            @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+            @ApiResponse(responseCode = "500", description = "Erro interno")
     })
     @PostMapping("/groups")
-    public ResponseEntity<String> save(@Valid @RequestBody CreateGroupDto createGroupDto) {
-        try {
-            groupService.save(createGroupDto);
-            return ResponseEntity.ok("Grupo criado com sucesso");
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Erro ao criar grupo: " + e.getMessage());
-        }
+    public ResponseEntity<MessageResponse> save(@Valid @RequestBody CreateGroupDto dto) {
+        groupService.save(dto);
+        return ResponseEntity.ok(new MessageResponse("Grupo criado com sucesso"));
     }
 
-    @Operation(summary = "Busca um grupo por ID", description = "Retorna os detalhes de um grupo específico pelo seu ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Grupo encontrado"),
-            @ApiResponse(responseCode = "404", description = "Grupo não encontrado"),
-            @ApiResponse(responseCode = "500", description = "Erro interno ao buscar grupo")
-    })
+    @Operation(summary = "Busca um grupo por ID")
     @GetMapping("/groups/{id}")
-    public ResponseEntity<?> findById(@PathVariable String id) {
-        try {
-            GroupDto group = groupService.findById(id);
-            return ResponseEntity.ok(group);
-        } catch (Exception e) {
-            return ResponseEntity.status(404).body("Grupo não encontrado: " + e.getMessage());
-        }
+    public ResponseEntity<GroupDto> findById(@PathVariable String id) {
+        return ResponseEntity.ok(groupService.findById(id));
     }
 
-    @Operation(summary = "Lista todos os grupos", description = "Retorna uma lista de todos os grupos no Keycloak")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Lista de grupos retornada com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Nenhum grupo encontrado"),
-            @ApiResponse(responseCode = "500", description = "Erro interno ao listar grupos")
-    })
+    @Operation(summary = "Lista todos os grupos")
     @GetMapping("/groups")
-    public ResponseEntity<?> findAll() {
-        try {
-            List<GroupDto> groups = groupService.findAll();
-            return ResponseEntity.ok(groups);
-        } catch (Exception e) {
-            return ResponseEntity.status(404).body("Nenhum grupo encontrado: " + e.getMessage());
-        }
+    public ResponseEntity<List<GroupDto>> findAll() {
+        return ResponseEntity.ok(groupService.findAll());
     }
 
-    @Operation(summary = "Deleta um grupo por ID", description = "Remove um grupo do Keycloak pelo seu ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Grupo deletado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Grupo não encontrado"),
-            @ApiResponse(responseCode = "500", description = "Erro interno ao deletar grupo")
-    })
+    @Operation(summary = "Deleta um grupo por ID")
     @DeleteMapping("/groups/{id}")
-    public ResponseEntity<String> deleteById(@PathVariable String id) {
-        try {
-            String message = groupService.deleteById(id);
-            return ResponseEntity.ok("Grupo deletado com sucesso");
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Erro ao deletar grupo: " + e.getMessage());
-        }
+    public ResponseEntity<MessageResponse> deleteById(@PathVariable String id) {
+        groupService.deleteById(id);
+        return ResponseEntity.ok(new MessageResponse("Grupo deletado com sucesso"));
     }
 
-    @Operation(summary = "Atualiza um grupo por ID", description = "Atualiza os dados de um grupo existente no Keycloak")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Grupo atualizado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos"),
-            @ApiResponse(responseCode = "404", description = "Grupo não encontrado"),
-            @ApiResponse(responseCode = "500", description = "Erro interno ao atualizar grupo")
-    })
+    @Operation(summary = "Atualiza um grupo por ID")
     @PutMapping("/groups/{id}")
-    public ResponseEntity<?> updateById(@PathVariable String id, @Valid @RequestBody CreateGroupDto updatedGroup) {
-        try {
-            CreateGroupDto group = groupService.updateById(id, updatedGroup);
-            return ResponseEntity.ok(group);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Erro ao atualizar grupo: " + e.getMessage());
-        }
+    public ResponseEntity<MessageResponse> updateById(@PathVariable String id, @Valid @RequestBody CreateGroupDto updatedGroup) {
+        groupService.updateById(id, updatedGroup);
+        return ResponseEntity.ok(new MessageResponse("Grupo atualizado com sucesso"));
     }
 }
