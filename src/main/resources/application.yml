@@ -4,24 +4,45 @@ server:
 spring:
   application:
     name: internal_support
+
   datasource:
-    url: jdbc:mysql://database.host.net:3306/internal_support
-    username: db_user
-    password: felipe
+    url: jdbc:mysql://database.host.net:3306/internal_support?useSSL=true&serverTimezone=UTC
+    username: ${DB_USERNAME:db_user}
+    password: ${DB_PASSWORD:felipe}
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
+        dialect: org.hibernate.dialect.MySQL8Dialect
     show-sql: true
+
   security:
     oauth2:
-          resourceserver:
-            jwt:
-              issuer-uri: https://localhost:8080/realms/time05
+      resourceserver:
+        jwt:
+          issuer-uri: https://localhost:8080/realms/internal-support
+          # jwk-set-uri: https://localhost:8080/realms/internal-support/protocol/openid-connect/certs  # Descomente se precisar
+
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
 
 upload:
-  path: /root/files
+  path: /app/files
 
+keycloak:
+  auth-server-url: https://localhost:8080
+  realm: internal-support
+  client-id: internal-support
+  admin:
+    token-url: https://localhost:8080/realms/master/protocol/openid-connect/token
+    client-id: admin-cli
+    username: ${KEYCLOAK_ADMIN_USERNAME:admin}
+    password: ${KEYCLOAK_ADMIN_PASSWORD:admin123}
+    base-url: https://localhost:8080/admin/realms/internal-support
+    groups-url: ${keycloak.admin.base-url}/groups
+    users-url: ${keycloak.admin.base-url}/users
