@@ -58,7 +58,7 @@ public class KeycloakUserRepresentation {
         return user;
     }
 
-    public static KeycloakUserRepresentation buildForUpdate(CreateUserDto userDto) {
+    public static KeycloakUserRepresentation buildForUpdate(UserUpdateRequest userDto) {
         KeycloakUserRepresentation user = new KeycloakUserRepresentation();
         user.setEmail(userDto.getEmail());
         user.setFirstName(userDto.getFirstName());
