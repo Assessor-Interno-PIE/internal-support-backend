@@ -2,6 +2,7 @@ package app.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -54,7 +55,7 @@ public class SecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http, JwtDecoder jwtDecoder) throws Exception {
 		http
 				.csrf(AbstractHttpConfigurer::disable) // Disable CSRF for API endpoints
-				.cors(AbstractHttpConfigurer::disable) // Disable CORS for API endpoints
+				.cors(Customizer.withDefaults()) // Disable CORS for API endpoints
 				// Configures authorization rules for different endpoints
 				.authorizeHttpRequests(authorize -> authorize
 						// Swagger UI v3 (OpenAPI)
@@ -63,6 +64,7 @@ public class SecurityConfig {
 						.requestMatchers("/swagger-ui.html").permitAll()
 						// Endpoints públicos
 						.requestMatchers("/").permitAll() // Allows public access to the root URL
+						.requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
 
 						// TESTING ENDPOINTS
 						.requestMatchers("/api/auth/userinfo").permitAll() // PARA O SWAGGER
