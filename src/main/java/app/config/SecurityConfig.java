@@ -74,18 +74,15 @@ public class SecurityConfig {
 						// Keycloak Groups
 						.requestMatchers("/api/keycloak/groups/**").hasAuthority("ROLE_ADMIN")
 
+						// Keycloak Users
+						.requestMatchers("/api/keycloak/users/**").hasAuthority("ROLE_ADMIN")
+
 						// Documents
-						.requestMatchers("/api/documents/view/**").authenticated() // View documents requires authentication
-						.requestMatchers("/api/documents/download/**").authenticated() // Download requires authentication
-						.requestMatchers("/api/documents/find-by-id/**").authenticated() // Find by ID requires authentication
-						.requestMatchers("/api/documents/find-all").authenticated() // List all requires authentication
-						.requestMatchers("/api/documents/find-all/paginated").authenticated() // Paginated list requires authentication
-						.requestMatchers("/api/documents/by-department/**").authenticated() // Department filter requires authentication
-						.requestMatchers("/api/documents/search/title-contains").authenticated() // Search requires authentication
-						.requestMatchers("/api/documents/save").authenticated() // Save requires authentication
-						.requestMatchers("/api/documents/edit/**").authenticated() // Edit requires authentication
-						.requestMatchers("/api/documents/**").authenticated() // Any other document endpoint requires authentication
-						.anyRequest().authenticated() // Requires authentication for any other request
+						.requestMatchers("/api/documents/by-department/**").authenticated()
+						.requestMatchers("/api/documents/download/**").authenticated()
+						.requestMatchers("/api/documents/view/**").authenticated()
+						.requestMatchers("/api/documents/**").hasAuthority("ROLE_ADMIN")
+						.anyRequest().authenticated()
 				)
 				.oauth2Login(Customizer.withDefaults())
 				.oauth2ResourceServer(oauth2 -> oauth2
