@@ -69,8 +69,8 @@ public class DocumentController {
         try {
             Resource resource = documentService.downloadFile(documentId);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"document-" + documentId + "\"")
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"document-" + documentId + ".pdf\"")
+                    .contentType(MediaType.APPLICATION_PDF)
                     .body(resource);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -90,8 +90,8 @@ public class DocumentController {
         try {
             Resource resource = documentService.downloadFile(documentId);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"document-" + documentId + "\"")
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"document-" + documentId + ".pdf\"")
+                    .contentType(MediaType.APPLICATION_PDF)
                     .body(resource);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
