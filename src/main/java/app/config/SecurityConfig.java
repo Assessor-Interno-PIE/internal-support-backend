@@ -82,6 +82,7 @@ public class SecurityConfig {
 						// Documents
 						.requestMatchers("/api/documents/by-department/**").authenticated()
 						.requestMatchers("/api/documents/download/**").authenticated()
+						.requestMatchers("/api/documents/paginated/**").authenticated()
 						.requestMatchers("/api/documents/view/**").authenticated()
 						.requestMatchers("/api/documents/**").hasAuthority("ROLE_ADMIN")
 						.anyRequest().authenticated()

@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,9 +43,20 @@ public class UserController {
     }
 
     @Operation(summary = "Lista todos os usuários")
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<UserDto>> findAll() {
         return ResponseEntity.ok(userService.findAll());
+    }
+
+    @Operation(summary = "Lista usuários paginados")
+    @GetMapping("/paginated")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de usuários retornada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Parâmetros de paginação inválidos"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public ResponseEntity<Page<UserDto>> findAllPaginated(Pageable pageable) {
+        return ResponseEntity.ok(userService.findAllPaginated(pageable));
     }
 
     @Operation(summary = "Deleta um usuário por ID")
@@ -58,4 +71,4 @@ public class UserController {
     public ResponseEntity<UserDto> updateById(@PathVariable String id, @Valid @RequestBody UpdateUserDto updatedUser) {
         return ResponseEntity.ok(userService.updateById(id, updatedUser));
     }
-} 
+}
