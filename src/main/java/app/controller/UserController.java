@@ -1,6 +1,7 @@
 package app.controller;
 
 import app.dto.CreateUserDto;
+import app.dto.UpdateUserDto;
 import app.dto.UserDto;
 import app.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,7 +55,7 @@ public class UserController {
 
     @Operation(summary = "Atualiza um usuário por ID")
     @PutMapping("/{id}")
-    public ResponseEntity<UserDto> updateById(@PathVariable String id, @Valid @RequestBody CreateUserDto updatedUser) {
+    public ResponseEntity<UserDto> updateById(@PathVariable String id, @Valid @RequestBody UpdateUserDto updatedUser) {
         return ResponseEntity.ok(userService.updateById(id, updatedUser));
     }
 } 
