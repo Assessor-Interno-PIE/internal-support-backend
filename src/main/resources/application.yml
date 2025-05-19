@@ -1,48 +1,54 @@
 server:
-  port: 5000
+  port: 5000  # Porta onde o backend Spring Boot vai rodar (correto)
 
 spring:
   application:
-    name: internal_support
+    name: internal_support  # Nome da aplicação (correto)
 
   datasource:
-    url: jdbc:mysql://database.host.net:3306/internal_support?useSSL=true&serverTimezone=UTC
-    username: ${DB_USERNAME:db_user}
-    password: ${DB_PASSWORD:felipe}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://database.host.net:3306/internal_support?useSSL=true&requireSSL=true&serverTimezone=UTC
+    # Ajustei a URL pra forçar o uso de SSL (requireSSL=true), já que você precisa de TLS no MySQL
+    # Substitua 'database.host.net' pelo IP ou domínio real da VM do banco de dados (ex.: 172.16.20.4)
+    username: ${DB_USERNAME:db_user}  # Usuário do banco (correto, com variável de ambiente)
+    password: ${DB_PASSWORD:felipe}   # Senha do banco (correto, com variável de ambiente)
+    driver-class-name: com.mysql.cj.jdbc.Driver  # Driver do MySQL (correto)
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: update  # Cria/atualiza as tabelas automaticamente (bom pra desenvolvimento)
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
-    show-sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect  # Dialeto do MySQL (correto)
+    show-sql: true  # Mostra os comandos SQL no console (útil pra debug)
 
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://localhost:8080/realms/internal-support
-          # jwk-set-uri: https://localhost:8080/realms/internal-support/protocol/openid-connect/certs  # Descomente se precisar
+          issuer-uri: http://keycloak.local:8080/realms/internal-support
+          # Ajustei pra http (sem SSL) porque você está rodando o Keycloak localmente no Docker
+          # Se você configurar TLS no Keycloak mais tarde, volte pra https://keycloak.local:8080
+          # jwk-set-uri: http://keycloak.local:8080/realms/internal-support/protocol/openid-connect/certs
+          # Deixei comentado, já que o Spring Boot pode buscar automaticamente com o issuer-uri
 
   servlet:
     multipart:
-      max-file-size: 100MB
-      max-request-size: 100MB
+      max-file-size: 100MB  # Limite pra upload de arquivos (correto)
+      max-request-size: 100MB  # Limite pra requisições multipart (correto)
 
 upload:
-  path: /app/files
+  path: /app/files  # Diretório pra upload de arquivos (correto)
 
 keycloak:
-  auth-server-url: https://localhost:8080
-  realm: internal-support
-  client-id: internal-support
+  auth-server-url: http://keycloak.local:8080  # URL base do Keycloak (ajustei pra http, já que não está usando TLS ainda)
+  realm: internal-support  # Realm que você está usando (correto)
+  client-id: internal-support  # Client ID do backend (ajustei pra refletir o nome do sistema)
   admin:
-    token-url: https://localhost:8080/realms/master/protocol/openid-connect/token
-    client-id: admin-cli
-    username: ${KEYCLOAK_ADMIN_USERNAME:admin}
-    password: ${KEYCLOAK_ADMIN_PASSWORD:admin123}
-    base-url: https://localhost:8080/admin/realms/internal-support
-    groups-url: ${keycloak.admin.base-url}/groups
-    users-url: ${keycloak.admin.base-url}/users
+    token-url: http://keycloak.local:8080/realms/master/protocol/openid-connect/token
+    # URL pra obter o token de administrador (realm master, correto)
+    client-id: admin-cli  # Client ID administrativo (correto)
+    username: ${KEYCLOAK_ADMIN_USERNAME:admin}  # Usuário admin do Keycloak (correto)
+    password: ${KEYCLOAK_ADMIN_PASSWORD:admin123}  # Senha admin do Keycloak (correto)
+    base-url: http://keycloak.local:8080/admin/realms/internal-support  # URL base do realm (ajustei pra http)
+    groups-url: ${keycloak.admin.base-url}/groups  # URL pra gerenciar grupos (correto)
+    users-url: ${keycloak.admin.base-url}/users    # URL pra gerenciar usuários (correto)

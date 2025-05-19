@@ -7,7 +7,9 @@ import java.util.List;
 
 public interface DocumentRepository extends JpaRepository<Document, Long> {
 
-    List<Document> findByDepartment(String departmentName);
+    // Alterado de findByDepartment pra findByDepartmentName
+    List<Document> findByDepartmentName(String departmentName);
+
     List<Document> findByTitleContaining(String keyword);
     List<Document> findByTitleContainingIgnoreCase(String keyword);
 }

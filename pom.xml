@@ -19,6 +19,7 @@
 	<groupId>com.internal-support</groupId>
 	<artifactId>internal-support</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>war</packaging>
 	<name>internal-support</name>
 	<description>Internal Support System</description>
 	<url/>

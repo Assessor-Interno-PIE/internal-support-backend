@@ -82,7 +82,7 @@ public class DocumentService {
      * Busca documentos por nome do departamento
      */
     public List<Document> findDocumentsByDepartment(String departmentName) {
-        return documentRepository.findByDepartment(departmentName);
+        return documentRepository.findByDepartmentName(departmentName);
     }
 
     /**
