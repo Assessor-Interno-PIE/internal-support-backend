@@ -74,7 +74,7 @@ public class SecurityConfig {
 						.requestMatchers("/api/auth/login").permitAll()
 
 						// Keycloak Groups
-						.requestMatchers("/api/keycloak/groups/**").hasAuthority("ROLE_ADMIN")
+						.requestMatchers("/api/keycloak/groups/**").authenticated()
 
 						// Keycloak Users
 						.requestMatchers("/api/keycloak/users/**").hasAuthority("ROLE_ADMIN")
@@ -84,7 +84,8 @@ public class SecurityConfig {
 						.requestMatchers("/api/documents/download/**").authenticated()
 						.requestMatchers("/api/documents/paginated/**").authenticated()
 						.requestMatchers("/api/documents/view/**").authenticated()
-						.requestMatchers("/api/documents/**").hasAuthority("ROLE_ADMIN")
+						.requestMatchers("/api/documents/**").authenticated()
+						.requestMatchers("/api/documents/save").hasAuthority("ROLE_ADMIN")
 						.anyRequest().authenticated()
 				)
 				.oauth2Login(Customizer.withDefaults())
