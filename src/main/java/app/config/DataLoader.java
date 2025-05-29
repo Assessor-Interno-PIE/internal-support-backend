@@ -1,7 +1,7 @@
 package app.config;
 
 import app.entity.Document;
-import app.repository.DocumentRepository;
+import app.repository.jpa.DocumentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

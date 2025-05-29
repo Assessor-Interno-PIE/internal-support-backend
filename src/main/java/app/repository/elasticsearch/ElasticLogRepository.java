@@ -1,5 +1,5 @@
 // LogRepository.java
-package app.repository;
+package app.repository.elasticsearch;
 
 import app.entity.Log;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;

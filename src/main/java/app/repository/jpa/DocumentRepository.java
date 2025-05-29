@@ -1,4 +1,4 @@
-package app.repository;
+package app.repository.jpa;
 
 import app.entity.Document;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,6 +8,5 @@ import java.util.List;
 
 @Repository
 public interface DocumentRepository extends JpaRepository<Document, Long> {
-
     List<Document> findByGroupId(String groupId);
 }

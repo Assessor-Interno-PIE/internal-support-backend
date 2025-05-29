@@ -1,7 +1,7 @@
 package app.service;
 
 import app.entity.Document;
-import app.repository.DocumentRepository;
+import app.repository.jpa.DocumentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -19,6 +19,9 @@ public class DocumentService {
     @Autowired
     private DocumentRepository documentRepository;
 
+    @Autowired
+    private LogService logService;
+
     // Salvar novo documento
     public Document save(MultipartFile file, String groupId, String title, String description, String addedBy) throws IOException {
         Document document = new Document();
@@ -27,6 +30,8 @@ public class DocumentService {
         document.setDescription(description);
         document.setFilePath(file.getBytes());
         document.setAddedBy(addedBy);
+
+        logService.registrar("Salvar", addedBy, "/api/documents/save", "Novo documento salvo");
 
         return documentRepository.save(document);
     }
@@ -41,6 +46,9 @@ public class DocumentService {
             throw new IOException("Arquivo não disponível no documento");
         }
 
+        String endpoint = "/view/" + documentId;
+
+        logService.registrar("Download", "", endpoint, "Documento baixado");
         return new ByteArrayResource(fileBytes);
     }
 
@@ -56,6 +64,8 @@ public class DocumentService {
         if (documents.isEmpty()) {
             throw new RuntimeException("Não há documentos registrados!");
         }
+
+        logService.registrar("Busca", "", "/api/documents", "Busca de todos os documentos");
         return documents;
     }
 
@@ -65,12 +75,18 @@ public class DocumentService {
         if (documents.isEmpty()) {
             throw new RuntimeException("Não há documentos registrados!");
         }
+
+        logService.registrar("Busca", "", "/api/documents/paginated", "Busca de documentos paginados");
         return documents;
     }
 
     // Buscar por grupo
     public List<Document> findByGroupId(String groupId) {
+        String endpoint = "/by-group/" + groupId;
+
+        logService.registrar("Busca", "", endpoint, "Busca por grupo");
         return documentRepository.findByGroupId(groupId);
+
     }
 
     // Deletar por ID
@@ -78,6 +94,9 @@ public class DocumentService {
         if (!documentRepository.existsById(id)) {
             throw new IllegalArgumentException("Documento com o ID fornecido não foi encontrado.");
         }
+
+        String endpoint = "/api/documents/" + id;
+        logService.registrar("Delete", "", endpoint, "Documento deletado");
         documentRepository.deleteById(id);
     }
 
@@ -94,6 +113,8 @@ public class DocumentService {
             document.setFilePath(file.getBytes());
         }
 
+        String endpoint = "/api/documents/" + id;
+        logService.registrar("Atualização", "", endpoint, "Atualização de Documento");
         return documentRepository.save(document);
     }
 }
