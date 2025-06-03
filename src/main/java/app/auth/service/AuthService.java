@@ -1,6 +1,8 @@
 package app.auth.service;
 
 import app.exception.handler.AuthenticationException;
+import app.service.LogService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
@@ -10,10 +12,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -23,6 +22,9 @@ import java.util.stream.Collectors;
 public class AuthService {
 
     private final RestTemplate restTemplate;
+
+    @Autowired
+    private LogService logService;
 
     @Value("${keycloak.auth-server-url}")
     private String keycloakUrl;
@@ -39,11 +41,6 @@ public class AuthService {
 
     /**
      * Realiza a autenticação do usuário através do Keycloak
-     *
-     * @param username Nome de usuário
-     * @param password Senha do usuário
-     * @return Resposta da autenticação com os tokens
-     * @throws AuthenticationException Em caso de falha na autenticação
      */
     public Map<String, Object> login(String username, String password) {
         String tokenUrl = keycloakUrl + "/realms/" + realm + "/protocol/openid-connect/token";
@@ -61,29 +58,29 @@ public class AuthService {
 
         try {
             ResponseEntity<Map> response = restTemplate.postForEntity(tokenUrl, request, Map.class);
+            logService.registrar("Login", username, "/auth/login", "Login realizado com sucesso");
             return response.getBody();
         } catch (Exception e) {
+            logService.registrar("Login", username, "/auth/login", "Falha ao autenticar: " + e.getMessage());
             throw new AuthenticationException("Falha na autenticação: " + e.getMessage());
         }
     }
 
     /**
      * Obtém informações do usuário autenticado
-     *
-     * @param authentication Objeto de autenticação do Spring Security
-     * @return Mapa com informações do usuário
      */
     public Map<String, Object> getUserInfo(Authentication authentication) {
         Map<String, Object> userInfo = new HashMap<>();
 
         if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
-            // Informações básicas do usuário
+            String username = jwt.getClaim("preferred_username");
+
             userInfo.put("id", jwt.getSubject());
-            userInfo.put("username", jwt.getClaim("preferred_username"));
+            userInfo.put("username", username);
             userInfo.put("name", jwt.getClaim("name"));
             userInfo.put("email", jwt.getClaim("email"));
 
-            // Roles do client
+            // Roles
             List<String> roles = new ArrayList<>();
             Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
             if (resourceAccess != null && resourceAccess.containsKey(clientId)) {
@@ -94,7 +91,7 @@ public class AuthService {
             }
             userInfo.put("roles", roles);
 
-            // Departamentos do usuário
+            // Departamentos
             List<String> groups = jwt.getClaim("groups");
             if (groups != null) {
                 List<String> departments = groups.stream()
@@ -103,7 +100,6 @@ public class AuthService {
                         .collect(Collectors.toList());
                 userInfo.put("departments", departments);
 
-                // Departamento atual do usuário
                 String currentDepartment = groups.stream()
                         .filter(group -> group.startsWith("DEPT_"))
                         .findFirst()
@@ -112,8 +108,9 @@ public class AuthService {
                 userInfo.put("currentDepartment", currentDepartment);
             }
 
-            // Status da autenticação
             userInfo.put("isAuthenticated", authentication.isAuthenticated());
+
+            logService.registrar("Consulta", username, "/auth/userinfo", "Informações do usuário recuperadas");
         }
 
         return userInfo;
@@ -121,12 +118,15 @@ public class AuthService {
 
     /**
      * Verifica se o usuário está autenticado
-     *
-     * @param authentication Objeto de autenticação do Spring Security
-     * @return true se autenticado, false caso contrário
      */
     public boolean isAuthenticated(Authentication authentication) {
-        return authentication != null && authentication.isAuthenticated();
-    }
+        boolean autenticado = authentication != null && authentication.isAuthenticated();
+        String username = "desconhecido";
+        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
+            username = jwt.getClaim("preferred_username");
+        }
 
+        logService.registrar("Autenticação", username, "/auth/check", "Usuário autenticado: " + autenticado);
+        return autenticado;
+    }
 }

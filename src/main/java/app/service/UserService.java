@@ -7,6 +7,7 @@ import app.dto.UpdateUserDto;
 import app.dto.UserDto;
 import app.exception.handler.KeycloakException;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -18,16 +19,16 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class UserService {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final TokenService tokenService;
+
+    @Autowired
+    private LogService logService;
 
     @Value("${keycloak.admin.users-url}")
     private String usersUrl;
@@ -47,21 +48,12 @@ public class UserService {
             ResponseEntity<UserDto> response = restTemplate.exchange(
                     usersUrl, HttpMethod.POST, entity, UserDto.class
             );
+
+            logService.registrar("Usuário", dto.getUsername(), "/users", "Usuário criado com sucesso");
             return response.getBody();
-        } catch (HttpClientErrorException e) {
-            String errorMessage = String.format("Erro ao criar usuário (Status: %s): %s",
-                    e.getStatusCode(), e.getResponseBodyAsString());
-            throw new KeycloakException(errorMessage, e);
-        } catch (HttpServerErrorException e) {
-            String errorMessage = String.format("Erro no servidor Keycloak (Status: %s): %s",
-                    e.getStatusCode(), e.getResponseBodyAsString());
-            throw new KeycloakException(errorMessage, e);
-        } catch (RestClientException e) {
-            String errorMessage = String.format("Erro de conexão com Keycloak: %s", e.getMessage());
-            throw new KeycloakException(errorMessage, e);
         } catch (Exception e) {
-            String errorMessage = String.format("Erro inesperado ao criar usuário: %s", e.getMessage());
-            throw new KeycloakException(errorMessage, e);
+            logService.registrar("Usuário", dto.getUsername(), "/users", "Erro ao criar usuário: " + e.getMessage());
+            throw handleException(e, "criar usuário");
         }
     }
 
@@ -69,27 +61,17 @@ public class UserService {
         try {
             HttpEntity<String> entity = new HttpEntity<>(getHeaders());
             ResponseEntity<UserDto> response = restTemplate.exchange(
-                    usersUrl + "/" + id,
-                    HttpMethod.GET,
-                    entity,
-                    UserDto.class
+                    usersUrl + "/" + id, HttpMethod.GET, entity, UserDto.class
             );
 
             UserDto user = response.getBody();
-            if (user == null) {
-                throw new EntityNotFoundException("Usuário não encontrado com id: " + id);
-            }
+            if (user == null) throw new EntityNotFoundException("Usuário não encontrado com id: " + id);
 
+            logService.registrar("Usuário", id, "/users/" + id, "Usuário encontrado com sucesso");
             return user;
-        } catch (HttpClientErrorException.NotFound e) {
-            throw new EntityNotFoundException("Usuário não encontrado com id: " + id);
-        } catch (HttpClientErrorException e) {
-            String errorMessage = String.format("Erro ao buscar usuário (Status: %s): %s",
-                    e.getStatusCode(), e.getResponseBodyAsString());
-            throw new KeycloakException(errorMessage, e);
         } catch (Exception e) {
-            String errorMessage = String.format("Erro ao buscar usuário: %s", e.getMessage());
-            throw new KeycloakException(errorMessage, e);
+            logService.registrar("Usuário", id, "/users/" + id, "Erro ao buscar usuário: " + e.getMessage());
+            throw handleException(e, "buscar usuário");
         }
     }
 
@@ -99,25 +81,22 @@ public class UserService {
             ResponseEntity<UserDto[]> response = restTemplate.exchange(
                     usersUrl, HttpMethod.GET, entity, UserDto[].class
             );
+
             List<UserDto> users = Arrays.asList(Objects.requireNonNull(response.getBody()));
             if (users.isEmpty()) throw new KeycloakException("Nenhum usuário encontrado");
+
+            logService.registrar("Usuário", null, "/users", "Lista de usuários obtida com sucesso");
             return users;
-        } catch (HttpClientErrorException e) {
-            String errorMessage = String.format("Erro ao listar usuários (Status: %s): %s",
-                    e.getStatusCode(), e.getResponseBodyAsString());
-            throw new KeycloakException(errorMessage, e);
         } catch (Exception e) {
-            String errorMessage = String.format("Erro ao listar usuários: %s", e.getMessage());
-            throw new KeycloakException(errorMessage, e);
+            logService.registrar("Usuário", null, "/users", "Erro ao listar usuários: " + e.getMessage());
+            throw handleException(e, "listar usuários");
         }
     }
 
     public Page<UserDto> findAllPaginated(Pageable pageable) {
-        List<UserDto> allUsers = findAll(); // Fetch all users from Keycloak
-
+        List<UserDto> allUsers = findAll(); // Logs feitos dentro do método findAll()
         int page = pageable.getPageNumber();
         int size = pageable.getPageSize();
-
         int start = page * size;
         int end = Math.min(start + size, allUsers.size());
 
@@ -130,28 +109,21 @@ public class UserService {
     }
 
     public void deleteById(String id) {
-        findById(id); // Verifica se o usuário existe
+        findById(id); // Log feito no método findById()
 
         try {
             HttpEntity<String> entity = new HttpEntity<>(getHeaders());
-            restTemplate.exchange(
-                    usersUrl + "/" + id,
-                    HttpMethod.DELETE,
-                    entity,
-                    Void.class
-            );
-        } catch (HttpClientErrorException e) {
-            String errorMessage = String.format("Erro ao deletar usuário (Status: %s): %s",
-                    e.getStatusCode(), e.getResponseBodyAsString());
-            throw new KeycloakException(errorMessage, e);
+            restTemplate.exchange(usersUrl + "/" + id, HttpMethod.DELETE, entity, Void.class);
+
+            logService.registrar("Usuário", id, "/users/" + id, "Usuário deletado com sucesso");
         } catch (Exception e) {
-            String errorMessage = String.format("Erro ao deletar usuário: %s", e.getMessage());
-            throw new KeycloakException(errorMessage, e);
+            logService.registrar("Usuário", id, "/users/" + id, "Erro ao deletar usuário: " + e.getMessage());
+            throw handleException(e, "deletar usuário");
         }
     }
 
     public UserDto updateById(String id, UpdateUserDto updatedUser) {
-        findById(id); // Verifica se o usuário existe
+        findById(id); // Log feito no método findById()
 
         try {
             HttpHeaders headers = getHeaders();
@@ -172,26 +144,14 @@ public class UserService {
             HttpEntity<KeycloakUserDto> entity = new HttpEntity<>(keycloakUser, headers);
 
             ResponseEntity<UserDto> response = restTemplate.exchange(
-                    usersUrl + "/" + id,
-                    HttpMethod.PUT,
-                    entity,
-                    UserDto.class
+                    usersUrl + "/" + id, HttpMethod.PUT, entity, UserDto.class
             );
+
+            logService.registrar("Usuário", id, "/users/" + id, "Usuário atualizado com sucesso");
             return response.getBody();
-        } catch (HttpClientErrorException e) {
-            String errorMessage = String.format("Erro ao atualizar usuário (Status: %s): %s",
-                    e.getStatusCode(), e.getResponseBodyAsString());
-            throw new KeycloakException(errorMessage, e);
-        } catch (HttpServerErrorException e) {
-            String errorMessage = String.format("Erro no servidor Keycloak (Status: %s): %s",
-                    e.getStatusCode(), e.getResponseBodyAsString());
-            throw new KeycloakException(errorMessage, e);
-        } catch (RestClientException e) {
-            String errorMessage = String.format("Erro de conexão com Keycloak: %s", e.getMessage());
-            throw new KeycloakException(errorMessage, e);
         } catch (Exception e) {
-            String errorMessage = String.format("Erro inesperado ao atualizar usuário: %s", e.getMessage());
-            throw new KeycloakException(errorMessage, e);
+            logService.registrar("Usuário", id, "/users/" + id, "Erro ao atualizar usuário: " + e.getMessage());
+            throw handleException(e, "atualizar usuário");
         }
     }
 
@@ -200,5 +160,18 @@ public class UserService {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
         return headers;
+    }
+
+    private RuntimeException handleException(Exception e, String acao) {
+        if (e instanceof HttpClientErrorException err) {
+            return new KeycloakException("Erro ao " + acao + " (Status: " + err.getStatusCode() + "): " + err.getResponseBodyAsString(), err);
+        }
+        if (e instanceof HttpServerErrorException err) {
+            return new KeycloakException("Erro no servidor Keycloak ao " + acao + " (Status: " + err.getStatusCode() + "): " + err.getResponseBodyAsString(), err);
+        }
+        if (e instanceof RestClientException err) {
+            return new KeycloakException("Erro de conexão ao " + acao + ": " + err.getMessage(), err);
+        }
+        return new KeycloakException("Erro inesperado ao " + acao + ": " + e.getMessage(), e);
     }
 }
