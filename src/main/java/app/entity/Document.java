@@ -13,6 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "documents")
+@EntityListeners(app.component.AuditListener.class)
 public class Document {
 
     @Id
