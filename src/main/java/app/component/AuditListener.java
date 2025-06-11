@@ -37,7 +37,6 @@ public class AuditListener {
     private void saveLog(Object entity, String action) {
         if (entity instanceof Document doc && staticRepo != null) {
             AuditLog log = new AuditLog();
-            log.
             staticRepo.save(log);
         }
     }
