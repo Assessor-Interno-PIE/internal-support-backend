@@ -23,4 +23,24 @@ public class AuditLog {
     private Long recordId;
     private String action;
     private LocalDateTime timestamp;
+
+    private String endpoint;
+    private String httpMethod;
+    private String userAgent;
+    private String ipAddress;
+    private String userId;
+
+    public AuditLog(String tableName, Long recordId, String action) {
+        this.tableName = tableName;
+        this.recordId = recordId;
+        this.action = action;
+        this.timestamp = LocalDateTime.now();
+    }
+
+    public AuditLog(String endpoint, String httpMethod, String action) {
+        this.endpoint = endpoint;
+        this.httpMethod = httpMethod;
+        this.action = action;
+        this.timestamp = LocalDateTime.now();
+    }
 }

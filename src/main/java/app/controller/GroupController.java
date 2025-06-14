@@ -3,13 +3,14 @@ package app.controller;
 import app.dto.CreateGroupDto;
 import app.dto.GroupDto;
 import app.service.GroupService;
+import app.service.AuditService;
 import app.dto.MessageResponse;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,52 +28,181 @@ public class GroupController {
 
     private final GroupService groupService;
 
+    @Autowired
+    private AuditService auditService;
+
     public GroupController(GroupService groupService) {
         this.groupService = groupService;
     }
 
     @Operation(summary = "Cria um novo grupo")
     @PostMapping("/groups")
-    public ResponseEntity<MessageResponse> save(@Valid @RequestBody CreateGroupDto dto) {
-        groupService.save(dto);
-        return ResponseEntity.ok(new MessageResponse("Grupo criado com sucesso"));
+    public ResponseEntity<MessageResponse> save(@Valid @RequestBody CreateGroupDto dto, HttpServletRequest request) { // ADICIONAR HttpServletRequest
+        try {
+            groupService.save(dto);
+
+            String currentUserId = getCurrentUserId(request);
+            auditService.logKeycloakOperation(
+                    "CREATE_GROUP",
+                    "KEYCLOAK_GROUP",
+                    null,
+                    currentUserId,
+                    "Created group: " + dto.getName()
+            );
+
+            return ResponseEntity.ok(new MessageResponse("Grupo criado com sucesso"));
+        } catch (Exception e) {
+            String currentUserId = getCurrentUserId(request);
+            auditService.logKeycloakOperation(
+                    "CREATE_GROUP_ERROR",
+                    "KEYCLOAK_GROUP",
+                    null,
+                    currentUserId,
+                    "Failed to create group: " + dto.getName() + " - Error: " + e.getMessage()
+            );
+            throw e;
+        }
     }
 
     @Operation(summary = "Busca um grupo por ID")
     @GetMapping("/groups/{id}")
-    public ResponseEntity<GroupDto> findById(@PathVariable String id) {
-        return ResponseEntity.ok(groupService.findById(id));
+    public ResponseEntity<GroupDto> findById(@PathVariable String id, HttpServletRequest request) { // ADICIONAR HttpServletRequest
+        GroupDto group = groupService.findById(id);
+
+        String currentUserId = getCurrentUserId(request);
+        auditService.logKeycloakOperation(
+                "READ_GROUP",
+                "KEYCLOAK_GROUP",
+                id,
+                currentUserId,
+                "Accessed group: " + group.getName()
+        );
+
+        return ResponseEntity.ok(group);
     }
 
     @Operation(summary = "Lista todos os grupos")
     @GetMapping("/groups")
-    public ResponseEntity<List<GroupDto>> findAll() {
-        return ResponseEntity.ok(groupService.findAll());
+    public ResponseEntity<List<GroupDto>> findAll(HttpServletRequest request) { // ADICIONAR HttpServletRequest
+        List<GroupDto> groups = groupService.findAll();
+
+        String currentUserId = getCurrentUserId(request);
+        auditService.logKeycloakOperation(
+                "READ_ALL_GROUPS",
+                "KEYCLOAK_GROUP",
+                null,
+                currentUserId,
+                "Listed all groups - Count: " + groups.size()
+        );
+
+        return ResponseEntity.ok(groups);
     }
 
     @Operation(summary = "Deleta um grupo por ID")
     @DeleteMapping("/groups/{id}")
-    public ResponseEntity<MessageResponse> deleteById(@PathVariable String id) {
-        groupService.deleteById(id);
-        return ResponseEntity.ok(new MessageResponse("Grupo deletado com sucesso"));
+    public ResponseEntity<MessageResponse> deleteById(@PathVariable String id, HttpServletRequest request) { // ADICIONAR HttpServletRequest
+        try {
+            GroupDto group = groupService.findById(id);
+            String groupName = group.getName();
+
+            groupService.deleteById(id);
+
+            String currentUserId = getCurrentUserId(request);
+            auditService.logKeycloakOperation(
+                    "DELETE_GROUP",
+                    "KEYCLOAK_GROUP",
+                    id,
+                    currentUserId,
+                    "Deleted group: " + groupName
+            );
+
+            return ResponseEntity.ok(new MessageResponse("Grupo deletado com sucesso"));
+        } catch (Exception e) {
+            String currentUserId = getCurrentUserId(request);
+            auditService.logKeycloakOperation(
+                    "DELETE_GROUP_ERROR",
+                    "KEYCLOAK_GROUP",
+                    id,
+                    currentUserId,
+                    "Failed to delete group ID: " + id + " - Error: " + e.getMessage()
+            );
+            throw e;
+        }
     }
 
     @Operation(summary = "Lista grupos paginados")
     @GetMapping("/find-all/paginated")
     public ResponseEntity<Page<GroupDto>> findAllPaginated(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size
+            @RequestParam(defaultValue = "5") int size,
+            HttpServletRequest request
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Page<GroupDto> paginated = groupService.findAllPaginated(pageable);
+
+        String currentUserId = getCurrentUserId(request);
+        auditService.logKeycloakOperation(
+                "READ_GROUPS_PAGINATED",
+                "KEYCLOAK_GROUP",
+                null,
+                currentUserId,
+                "Listed groups paginated - Page: " + page + ", Size: " + size + ", Total: " + paginated.getTotalElements()
+        );
+
         return ResponseEntity.ok(paginated);
     }
 
-
     @Operation(summary = "Atualiza um grupo por ID")
     @PutMapping("/groups/{id}")
-    public ResponseEntity<MessageResponse> updateById(@PathVariable String id, @Valid @RequestBody CreateGroupDto updatedGroup) {
-        groupService.updateById(id, updatedGroup);
-        return ResponseEntity.ok(new MessageResponse("Grupo atualizado com sucesso"));
+    public ResponseEntity<MessageResponse> updateById(@PathVariable String id, @Valid @RequestBody CreateGroupDto updatedGroup, HttpServletRequest request) { // ADICIONAR HttpServletRequest
+        try {
+            GroupDto oldGroup = groupService.findById(id);
+            String oldName = oldGroup.getName();
+
+            groupService.updateById(id, updatedGroup);
+
+            String currentUserId = getCurrentUserId(request);
+            auditService.logKeycloakOperation(
+                    "UPDATE_GROUP",
+                    "KEYCLOAK_GROUP",
+                    id,
+                    currentUserId,
+                    "Updated group: " + oldName + " -> " + updatedGroup.getName()
+            );
+
+            return ResponseEntity.ok(new MessageResponse("Grupo atualizado com sucesso"));
+        } catch (Exception e) {
+            // Log de erro
+            String currentUserId = getCurrentUserId(request);
+            auditService.logKeycloakOperation(
+                    "UPDATE_GROUP_ERROR",
+                    "KEYCLOAK_GROUP",
+                    id,
+                    currentUserId,
+                    "Failed to update group ID: " + id + " - Error: " + e.getMessage()
+            );
+            throw e;
+        }
+    }
+
+    // MÉTODO HELPER PARA PEGAR USER ID
+    private String getCurrentUserId(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            try {
+                // Se você tem um serviço JWT ou Spring Security configurado:
+                /*
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                if (auth instanceof JwtAuthenticationToken) {
+                    JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) auth;
+                    return jwtToken.getToken().getClaimAsString("sub"); // ou "preferred_username"
+                }
+                */
+                return "authenticated_user"; // Por enquanto
+            } catch (Exception e) {
+                return "token_error";
+            }
+        }
+        return "anonymous";
     }
 }

@@ -1,43 +1,38 @@
 package app.component;
 
-import app.entity.AuditLog;
-import app.entity.Document;
-import app.repository.AuditLogRepository;
+import app.service.AuditService;
 import jakarta.persistence.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-
 @Component
 public class AuditListener {
 
-    private static AuditLogRepository staticRepo;
+    private static AuditService auditService;
 
     @Autowired
-    public void init(AuditLogRepository repo) {
-        staticRepo = repo;
+    public void setAuditService(AuditService auditService) {
+        AuditListener.auditService = auditService;
     }
 
     @PostPersist
     public void onCreate(Object entity) {
-        saveLog(entity, "CREATE");
+        if (auditService != null) {
+            auditService.logEntityChange(entity, "CREATE");
+        }
     }
 
     @PostUpdate
     public void onUpdate(Object entity) {
-        saveLog(entity, "UPDATE");
+        if (auditService != null) {
+            auditService.logEntityChange(entity, "UPDATE");
+        }
     }
 
     @PreRemove
     public void onDelete(Object entity) {
-        saveLog(entity, "DELETE");
-    }
-
-    private void saveLog(Object entity, String action) {
-        if (entity instanceof Document doc && staticRepo != null) {
-            AuditLog log = new AuditLog();
-            staticRepo.save(log);
+        if (auditService != null) {
+            auditService.logEntityChange(entity, "DELETE");
         }
     }
 }
