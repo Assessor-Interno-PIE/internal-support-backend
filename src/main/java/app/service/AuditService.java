@@ -3,6 +3,8 @@ package app.service;
 import app.entity.AuditLog;
 import app.repository.AuditLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +16,11 @@ public class AuditService {
 
     @Autowired
     private AuditLogRepository auditLogRepository;
+
+    // Método para buscar todos os logs com paginação
+    public Page<AuditLog> getAllAuditLogs(Pageable pageable) {
+        return auditLogRepository.findAll(pageable);
+    }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void logEntityChange(Object entity, String action) {
