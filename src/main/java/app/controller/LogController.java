@@ -23,13 +23,10 @@ public class LogController {
 
     @GetMapping("/audit")
     public ResponseEntity<Page<AuditLog>> getAllAuditLogs(
-            // Parâmetros de paginação e ordenação (sem alteração)
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "timestamp") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir,
-
-            // --- NOVOS PARÂMETROS DE FILTRO ---
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(required = false) String userId,
@@ -43,7 +40,6 @@ public class LogController {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        // Chama o service com todos os parâmetros, incluindo os filtros
         Page<AuditLog> auditLogs = auditService.getAllAuditLogs(pageable, startDate, endDate, userId, endpoint, httpMethod);
 
         return ResponseEntity.ok(auditLogs);

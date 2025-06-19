@@ -4,15 +4,15 @@ import app.dto.CreateUserDto;
 import app.dto.UpdateUserDto;
 import app.dto.UserDto;
 import app.service.UserService;
-import app.service.AuditService; // ADICIONAR IMPORT
+import app.service.AuditService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest; // ADICIONAR IMPORT
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired; // ADICIONAR IMPORT
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +38,7 @@ public class UserController {
 
     @Operation(summary = "Cria um novo usuário")
     @PostMapping
-    public ResponseEntity<UserDto> save(@Valid @RequestBody CreateUserDto dto, HttpServletRequest request) { // ADICIONAR HttpServletRequest
+    public ResponseEntity<UserDto> save(@Valid @RequestBody CreateUserDto dto, HttpServletRequest request) {
         try {
             UserDto createdUser = userService.save(dto);
 
@@ -50,7 +50,7 @@ public class UserController {
 
     @Operation(summary = "Busca um usuário por ID")
     @GetMapping("/{id}")
-    public ResponseEntity<UserDto> findById(@PathVariable String id, HttpServletRequest request) { // ADICIONAR HttpServletRequest
+    public ResponseEntity<UserDto> findById(@PathVariable String id, HttpServletRequest request) {
         UserDto user = userService.findById(id);
 
         return ResponseEntity.ok(user);
@@ -71,7 +71,7 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Parâmetros de paginação inválidos"),
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
-    public ResponseEntity<Page<UserDto>> findAllPaginated(Pageable pageable, HttpServletRequest request) { // ADICIONAR HttpServletRequest
+    public ResponseEntity<Page<UserDto>> findAllPaginated(Pageable pageable, HttpServletRequest request) {
         Page<UserDto> users = userService.findAllPaginated(pageable);
 
         return ResponseEntity.ok(users);
@@ -79,7 +79,7 @@ public class UserController {
 
     @Operation(summary = "Deleta um usuário por ID")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable String id, HttpServletRequest request) { // ADICIONAR HttpServletRequest
+    public ResponseEntity<Void> deleteById(@PathVariable String id, HttpServletRequest request) {
         try {
             UserDto user = userService.findById(id);
             String username = user.getUsername();
@@ -107,19 +107,10 @@ public class UserController {
         }
     }
 
-    // MÉTODO HELPER PARA PEGAR USER ID
     private String getCurrentUserId(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             try {
-                // Talvez descomentar dps:
-                /*
-                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-                if (auth instanceof JwtAuthenticationToken) {
-                    JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) auth;
-                    return jwtToken.getToken().getClaimAsString("sub"); // ou "preferred_username"
-                }
-                */
                 return "authenticated_user"; // Por enquanto
             } catch (Exception e) {
                 return "token_error";

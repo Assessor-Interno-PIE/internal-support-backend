@@ -37,7 +37,7 @@ public class GroupController {
 
     @Operation(summary = "Cria um novo grupo")
     @PostMapping("/groups")
-    public ResponseEntity<MessageResponse> save(@Valid @RequestBody CreateGroupDto dto, HttpServletRequest request) { // ADICIONAR HttpServletRequest
+    public ResponseEntity<MessageResponse> save(@Valid @RequestBody CreateGroupDto dto, HttpServletRequest request) {
         try {
             groupService.save(dto);
             return ResponseEntity.ok(new MessageResponse("Grupo criado com sucesso"));
@@ -48,21 +48,21 @@ public class GroupController {
 
     @Operation(summary = "Busca um grupo por ID")
     @GetMapping("/groups/{id}")
-    public ResponseEntity<GroupDto> findById(@PathVariable String id, HttpServletRequest request) { // ADICIONAR HttpServletRequest
+    public ResponseEntity<GroupDto> findById(@PathVariable String id, HttpServletRequest request) {
         GroupDto group = groupService.findById(id);
         return ResponseEntity.ok(group);
     }
 
     @Operation(summary = "Lista todos os grupos")
     @GetMapping("/groups")
-    public ResponseEntity<List<GroupDto>> findAll(HttpServletRequest request) { // ADICIONAR HttpServletRequest
+    public ResponseEntity<List<GroupDto>> findAll(HttpServletRequest request) {
         List<GroupDto> groups = groupService.findAll();
         return ResponseEntity.ok(groups);
     }
 
     @Operation(summary = "Deleta um grupo por ID")
     @DeleteMapping("/groups/{id}")
-    public ResponseEntity<MessageResponse> deleteById(@PathVariable String id, HttpServletRequest request) { // ADICIONAR HttpServletRequest
+    public ResponseEntity<MessageResponse> deleteById(@PathVariable String id, HttpServletRequest request) {
         try {
             GroupDto group = groupService.findById(id);
             if (group != null) {
@@ -88,7 +88,7 @@ public class GroupController {
 
     @Operation(summary = "Atualiza um grupo por ID")
     @PutMapping("/groups/{id}")
-    public ResponseEntity<MessageResponse> updateById(@PathVariable String id, @Valid @RequestBody CreateGroupDto updatedGroup, HttpServletRequest request) { // ADICIONAR HttpServletRequest
+    public ResponseEntity<MessageResponse> updateById(@PathVariable String id, @Valid @RequestBody CreateGroupDto updatedGroup, HttpServletRequest request) {
         try {
             GroupDto oldGroup = groupService.findById(id);
             String oldName = oldGroup.getName();
@@ -100,19 +100,10 @@ public class GroupController {
         }
     }
 
-    // MÉTODO HELPER PARA PEGAR USER ID
     private String getCurrentUserId(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             try {
-                // Se você tem um serviço JWT ou Spring Security configurado:
-                /*
-                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-                if (auth instanceof JwtAuthenticationToken) {
-                    JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) auth;
-                    return jwtToken.getToken().getClaimAsString("sub"); // ou "preferred_username"
-                }
-                */
                 return "authenticated_user"; // Por enquanto
             } catch (Exception e) {
                 return "token_error";
