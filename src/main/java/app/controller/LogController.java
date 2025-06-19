@@ -21,7 +21,7 @@ public class LogController {
     @GetMapping("/audit")
     public ResponseEntity<Page<AuditLog>> getAllAuditLogs(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "timestamp") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir) {
 
