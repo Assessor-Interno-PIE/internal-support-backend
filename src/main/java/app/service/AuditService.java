@@ -2,14 +2,16 @@ package app.service;
 
 import app.entity.AuditLog;
 import app.repository.AuditLogRepository;
+import jakarta.persistence.criteria.Predicate; // Pode ser javax.persistence.criteria.Predicate em versões mais antigas do Spring
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
+// ... outras importações ...
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class AuditService {
@@ -17,60 +19,47 @@ public class AuditService {
     @Autowired
     private AuditLogRepository auditLogRepository;
 
-    // Método para buscar todos os logs com paginação
-    public Page<AuditLog> getAllAuditLogs(Pageable pageable) {
-        return auditLogRepository.findAll(pageable);
+    // --- MÉTODO ATUALIZADO ---
+    public Page<AuditLog> getAllAuditLogs(Pageable pageable, LocalDate startDate, LocalDate endDate, String userId, String endpoint, String httpMethod) {
+
+        // Cria uma Specification para construir a query dinâmica
+        Specification<AuditLog> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Adiciona filtro por data de início (se fornecida)
+            if (startDate != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("timestamp"), startDate.atStartOfDay()));
+            }
+
+            // Adiciona filtro por data de fim (se fornecida)
+            if (endDate != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("timestamp"), endDate.atTime(23, 59, 59)));
+            }
+
+            // Adiciona filtro por usuário (se fornecido)
+            if (userId != null && !userId.trim().isEmpty()) {
+                // Usando 'like' para buscas parciais (ex: buscar "admin" encontra "admin@test.com")
+                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("userId")), "%" + userId.toLowerCase() + "%"));
+            }
+
+            // Adiciona filtro por endpoint (se fornecido)
+            if (endpoint != null && !endpoint.trim().isEmpty()) {
+                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("endpoint")), "%" + endpoint.toLowerCase() + "%"));
+            }
+
+            // Adiciona filtro por método HTTP (se fornecido)
+            if (httpMethod != null && !httpMethod.trim().isEmpty()) {
+                predicates.add(criteriaBuilder.equal(root.get("httpMethod"), httpMethod));
+            }
+
+            // Combina todos os predicados com 'AND'
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        // Executa a busca no repositório com a especificação e paginação
+        return auditLogRepository.findAll(spec, pageable);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void logEntityChange(Object entity, String action) {
-        try {
-            String tableName = entity.getClass().getSimpleName();
-            Long recordId = extractId(entity);
+    // ... O restante dos seus métodos continua aqui (logEntityChange, logHttpRequest, etc.) ...
 
-            AuditLog log = new AuditLog(tableName, recordId, action);
-            auditLogRepository.save(log);
-        } catch (Exception e) {
-            System.err.println("Erro ao salvar audit log: " + e.getMessage());
-        }
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void logHttpRequest(String endpoint, String method, String userAgent, String ip, String userId) {
-        try {
-            AuditLog log = new AuditLog(endpoint, method, "HTTP_REQUEST");
-            log.setUserAgent(userAgent);
-            log.setIpAddress(ip);
-            log.setUserId(userId);
-            auditLogRepository.save(log);
-        } catch (Exception e) {
-            System.err.println("Erro ao salvar audit log HTTP: " + e.getMessage());
-        }
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void logKeycloakOperation(String operation, String resourceType, String resourceId, String userId, String details) {
-        try {
-            AuditLog log = new AuditLog();
-            log.setAction(operation);
-            log.setTableName(resourceType);
-            log.setRecordId(resourceId != null ? Long.parseLong(resourceId) : null);
-            log.setUserId(userId);
-            log.setEndpoint(details);
-            log.setTimestamp(LocalDateTime.now());
-            auditLogRepository.save(log);
-        } catch (Exception e) {
-            System.err.println("Erro ao salvar audit log Keycloak: " + e.getMessage());
-        }
-    }
-
-    private Long extractId(Object entity) {
-        try {
-            var field = entity.getClass().getDeclaredField("id");
-            field.setAccessible(true);
-            return (Long) field.get(entity);
-        } catch (Exception e) {
-            return null;
-        }
-    }
 }

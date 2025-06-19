@@ -14,25 +14,4 @@ public class AuditListener {
     public void setAuditService(AuditService auditService) {
         AuditListener.auditService = auditService;
     }
-
-    @PostPersist
-    public void onCreate(Object entity) {
-        if (auditService != null) {
-            auditService.logEntityChange(entity, "CREATE");
-        }
-    }
-
-    @PostUpdate
-    public void onUpdate(Object entity) {
-        if (auditService != null) {
-            auditService.logEntityChange(entity, "UPDATE");
-        }
-    }
-
-    @PreRemove
-    public void onDelete(Object entity) {
-        if (auditService != null) {
-            auditService.logEntityChange(entity, "DELETE");
-        }
-    }
 }

@@ -7,8 +7,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @CrossOrigin("*")
 @RestController
@@ -20,17 +23,28 @@ public class LogController {
 
     @GetMapping("/audit")
     public ResponseEntity<Page<AuditLog>> getAllAuditLogs(
+            // Parâmetros de paginação e ordenação (sem alteração)
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "timestamp") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDir) {
+            @RequestParam(defaultValue = "desc") String sortDir,
+
+            // --- NOVOS PARÂMETROS DE FILTRO ---
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) String userId,
+            @RequestParam(required = false) String endpoint,
+            @RequestParam(required = false) String httpMethod
+    ) {
 
         Sort sort = sortDir.equalsIgnoreCase("desc")
                 ? Sort.by(sortBy).descending()
                 : Sort.by(sortBy).ascending();
 
         Pageable pageable = PageRequest.of(page, size, sort);
-        Page<AuditLog> auditLogs = auditService.getAllAuditLogs(pageable);
+
+        // Chama o service com todos os parâmetros, incluindo os filtros
+        Page<AuditLog> auditLogs = auditService.getAllAuditLogs(pageable, startDate, endDate, userId, endpoint, httpMethod);
 
         return ResponseEntity.ok(auditLogs);
     }

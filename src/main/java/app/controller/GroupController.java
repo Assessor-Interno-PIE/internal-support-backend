@@ -40,26 +40,8 @@ public class GroupController {
     public ResponseEntity<MessageResponse> save(@Valid @RequestBody CreateGroupDto dto, HttpServletRequest request) { // ADICIONAR HttpServletRequest
         try {
             groupService.save(dto);
-
-            String currentUserId = getCurrentUserId(request);
-            auditService.logKeycloakOperation(
-                    "CREATE_GROUP",
-                    "KEYCLOAK_GROUP",
-                    null,
-                    currentUserId,
-                    "Created group: " + dto.getName()
-            );
-
             return ResponseEntity.ok(new MessageResponse("Grupo criado com sucesso"));
         } catch (Exception e) {
-            String currentUserId = getCurrentUserId(request);
-            auditService.logKeycloakOperation(
-                    "CREATE_GROUP_ERROR",
-                    "KEYCLOAK_GROUP",
-                    null,
-                    currentUserId,
-                    "Failed to create group: " + dto.getName() + " - Error: " + e.getMessage()
-            );
             throw e;
         }
     }
@@ -68,16 +50,6 @@ public class GroupController {
     @GetMapping("/groups/{id}")
     public ResponseEntity<GroupDto> findById(@PathVariable String id, HttpServletRequest request) { // ADICIONAR HttpServletRequest
         GroupDto group = groupService.findById(id);
-
-        String currentUserId = getCurrentUserId(request);
-        auditService.logKeycloakOperation(
-                "READ_GROUP",
-                "KEYCLOAK_GROUP",
-                id,
-                currentUserId,
-                "Accessed group: " + group.getName()
-        );
-
         return ResponseEntity.ok(group);
     }
 
@@ -85,16 +57,6 @@ public class GroupController {
     @GetMapping("/groups")
     public ResponseEntity<List<GroupDto>> findAll(HttpServletRequest request) { // ADICIONAR HttpServletRequest
         List<GroupDto> groups = groupService.findAll();
-
-        String currentUserId = getCurrentUserId(request);
-        auditService.logKeycloakOperation(
-                "READ_ALL_GROUPS",
-                "KEYCLOAK_GROUP",
-                null,
-                currentUserId,
-                "Listed all groups - Count: " + groups.size()
-        );
-
         return ResponseEntity.ok(groups);
     }
 
@@ -103,29 +65,11 @@ public class GroupController {
     public ResponseEntity<MessageResponse> deleteById(@PathVariable String id, HttpServletRequest request) { // ADICIONAR HttpServletRequest
         try {
             GroupDto group = groupService.findById(id);
-            String groupName = group.getName();
-
-            groupService.deleteById(id);
-
-            String currentUserId = getCurrentUserId(request);
-            auditService.logKeycloakOperation(
-                    "DELETE_GROUP",
-                    "KEYCLOAK_GROUP",
-                    id,
-                    currentUserId,
-                    "Deleted group: " + groupName
-            );
-
+            if (group != null) {
+                groupService.deleteById(id);
+            }
             return ResponseEntity.ok(new MessageResponse("Grupo deletado com sucesso"));
         } catch (Exception e) {
-            String currentUserId = getCurrentUserId(request);
-            auditService.logKeycloakOperation(
-                    "DELETE_GROUP_ERROR",
-                    "KEYCLOAK_GROUP",
-                    id,
-                    currentUserId,
-                    "Failed to delete group ID: " + id + " - Error: " + e.getMessage()
-            );
             throw e;
         }
     }
@@ -139,16 +83,6 @@ public class GroupController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Page<GroupDto> paginated = groupService.findAllPaginated(pageable);
-
-        String currentUserId = getCurrentUserId(request);
-        auditService.logKeycloakOperation(
-                "READ_GROUPS_PAGINATED",
-                "KEYCLOAK_GROUP",
-                null,
-                currentUserId,
-                "Listed groups paginated - Page: " + page + ", Size: " + size + ", Total: " + paginated.getTotalElements()
-        );
-
         return ResponseEntity.ok(paginated);
     }
 
@@ -158,29 +92,10 @@ public class GroupController {
         try {
             GroupDto oldGroup = groupService.findById(id);
             String oldName = oldGroup.getName();
-
             groupService.updateById(id, updatedGroup);
-
-            String currentUserId = getCurrentUserId(request);
-            auditService.logKeycloakOperation(
-                    "UPDATE_GROUP",
-                    "KEYCLOAK_GROUP",
-                    id,
-                    currentUserId,
-                    "Updated group: " + oldName + " -> " + updatedGroup.getName()
-            );
 
             return ResponseEntity.ok(new MessageResponse("Grupo atualizado com sucesso"));
         } catch (Exception e) {
-            // Log de erro
-            String currentUserId = getCurrentUserId(request);
-            auditService.logKeycloakOperation(
-                    "UPDATE_GROUP_ERROR",
-                    "KEYCLOAK_GROUP",
-                    id,
-                    currentUserId,
-                    "Failed to update group ID: " + id + " - Error: " + e.getMessage()
-            );
             throw e;
         }
     }
