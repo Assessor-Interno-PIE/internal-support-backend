@@ -79,6 +79,9 @@ public class SecurityConfig {
 						// Keycloak Users
 						.requestMatchers("/api/keycloak/users/**").hasAuthority("ROLE_ADMIN")
 
+						// Audit Logs
+						.requestMatchers("/api/logs/audit").permitAll()
+
 						// Documents
 						.requestMatchers("/api/documents/by-department/**").authenticated()
 						.requestMatchers("/api/documents/download/**").authenticated()
