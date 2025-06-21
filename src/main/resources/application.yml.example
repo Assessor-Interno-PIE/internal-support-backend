@@ -11,9 +11,9 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
 
   datasource:
-    url: jdbc:mysql://localhost:3306/internal_support
-    username: YOUR_DB_USERNAME
-    password: YOUR_DB_PASSWORD
+    url: jdbc:mysql://database.host.net:3306/internal_support
+    username: heron
+    password: heron
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   main:
