@@ -49,6 +49,48 @@ public class AuditInterceptor implements HandlerInterceptor {
         return true;
     }
 
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        String endpoint = request.getRequestURI();
+        String method = request.getMethod();
+        
+        // Verifica se deve auditar esta requisição
+        if (shouldAuditRequest(endpoint, method)) {
+            try {
+                String userId = extractUserId(request);
+                String ipAddress = getClientIpAddress(request);
+                String userAgent = request.getHeader("User-Agent");
+                String action = method + " " + endpoint;
+                
+                // Determina a ação baseada no método HTTP
+                String auditAction = getAuditAction(method, endpoint);
+                
+                // Salva o log de auditoria
+                auditService.logHttpOperation(endpoint, method, auditAction, userId, ipAddress, userAgent);
+                
+            } catch (Exception e) {
+                System.err.println("Erro ao processar auditoria: " + e.getMessage());
+            }
+        }
+    }
+
+    private String getAuditAction(String method, String endpoint) {
+        switch (method) {
+            case "POST":
+                return "CREATE";
+            case "PUT":
+                return "UPDATE";
+            case "DELETE":
+                return "DELETE";
+            case "GET":
+                return "READ";
+            case "PATCH":
+                return "UPDATE";
+            default:
+                return method;
+        }
+    }
+
     private boolean shouldAuditRequest(String endpoint, String method) {
         // Ignora endpoints específicos
         for (String ignoredEndpoint : IGNORED_ENDPOINTS) {
